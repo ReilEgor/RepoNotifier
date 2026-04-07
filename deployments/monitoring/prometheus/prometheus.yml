@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 3s
+
+scrape_configs:
+  - job_name: "finScale-services"
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - "transaction-service:8080"
+          - "user-service:8080"
+          - "currency-service:8080"
+          - "auth-validator-service:8080"
