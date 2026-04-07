@@ -16,7 +16,8 @@
 ---
 
 ## 🏗️ Architecture (C4 Context)
-<img width="4524" height="1768" alt="image" src="https://github.com/user-attachments/assets/0c67906a-a438-415d-9e9c-d0b16c5d21df" />
+<img width="4524" height="1768" alt="image" src="https://github.com/user-attachments/assets/15231bf2-ac06-43d8-b861-b3b8e1e63163" />
+
 
 The service follows **Clean Architecture** principles:
 
