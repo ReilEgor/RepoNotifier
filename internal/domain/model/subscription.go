@@ -6,5 +6,6 @@ type Subscription struct {
 	ID           int64
 	UserID       int64
 	RepositoryID int64
+	LastSeenTag  string
 	CreatedAt    time.Time
 }

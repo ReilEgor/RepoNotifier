@@ -1,5 +1,12 @@
 package usecase
 
+import (
+	"context"
+	"errors"
+
+	"github.com/ReilEgor/RepoNotifier/internal/domain/model"
+)
+
 var (
 	ErrInvalidEmail      = errors.New("invalid email format")
 	ErrUserNotFound      = errors.New("user not found")

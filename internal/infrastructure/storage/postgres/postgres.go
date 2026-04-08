@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/ReilEgor/RepoNotifier/internal/config"
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
@@ -15,12 +16,12 @@ const (
 	MAX_IDLE_CONNS = 25
 )
 
-func New(ctx context.Context, dsn string) (*pgxpool.Pool, func(), error) {
+func New(ctx context.Context, dsn config.DSNType) (*pgxpool.Pool, func(), error) {
 	slog.With(slog.String("component", "postgres"))
 	slog.Info("connecting to database",
-		slog.String("dsn", maskDSN(dsn)),
+		slog.String("dsn", maskDSN(string(dsn))),
 	)
-	config, err := pgxpool.ParseConfig(dsn)
+	config, err := pgxpool.ParseConfig(string(dsn))
 	if err != nil {
 		return nil, nil, err
 	}

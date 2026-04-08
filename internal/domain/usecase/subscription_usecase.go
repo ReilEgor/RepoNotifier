@@ -3,6 +3,8 @@ package usecase
 import (
 	"context"
 	"errors"
+
+	"github.com/ReilEgor/RepoNotifier/internal/domain/model"
 )
 
 var (
@@ -12,7 +14,8 @@ var (
 )
 
 type SubscriptionUseCase interface {
-	Subscribe(ctx context.Context, email string, repoName string) error
+	Subscribe(ctx context.Context, email string, repoName string) (int64, error)
 	Unsubscribe(ctx context.Context, email string, repoName string) error
 	ProcessNotifications(ctx context.Context) error
+	ListByEmail(ctx context.Context, email string) ([]model.Subscription, error)
 }
