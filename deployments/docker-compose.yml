@@ -96,6 +96,7 @@ services:
       REDIS_PORT: ${REDIS_PORT}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       HTTP_PORT: 8080
+      DB_SOURCE: ${DB_URL}
     ports:
       - "8080:8080"
     depends_on:
@@ -175,10 +176,10 @@ services:
     ports:
       - "9080:8080"
     volumes:
-      - ../docs/api/swagger.json:/usr/share/nginx/html/docs/repo-notifier-service.json:ro
+      - ../docs/api/swagger.json:/usr/share/nginx/html/docs/swagger.json:ro
     environment:
       URLS: '[
-        { "url": "/docs/repo-notifier-service.json", "name": "RepoNotifier-service" }
+        { "url": "/docs/swagger.json", "name": "RepoNotifier-service" }
       ]'
     networks:
       - internal

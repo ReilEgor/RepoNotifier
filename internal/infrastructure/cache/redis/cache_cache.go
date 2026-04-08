@@ -20,8 +20,24 @@ func NewCache(client *redis.Client) *Cache {
 	}
 }
 func (c *Cache) Get(ctx context.Context, key string) (string, error) {
-	panic("implement me")
+	if err := c.client.Get(ctx, key).Err(); err != nil {
+		if err == redis.Nil {
+			return "", nil
+		}
+		c.logger.Error("cache get error", "key", key, "error", err)
+		return "", err
+	}
+	value, err := c.client.Get(ctx, key).Result()
+	if err != nil {
+		c.logger.Error("cache get error", "key", key, "error", err)
+		return "", err
+	}
+	return value, nil
 }
 func (c *Cache) Set(ctx context.Context, key string, value string, ttl time.Duration) error {
-	panic("implement me")
+	if err := c.client.Set(ctx, key, value, ttl).Err(); err != nil {
+		c.logger.Error("cache set error", "key", key, "error", err)
+		return err
+	}
+	return nil
 }

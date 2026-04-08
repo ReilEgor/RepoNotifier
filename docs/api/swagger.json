@@ -1,0 +1,269 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api/v1",
+    "paths": {
+        "/subscriptions": {
+            "get": {
+                "description": "Get a list of all repositories the user is currently subscribed to.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "subscriptions"
+                ],
+                "summary": "List user subscriptions",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User email address",
+                        "name": "email",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.ListSubscriptionsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Email is required",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a subscription for a user to track the latest releases of a GitHub repository.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "subscriptions"
+                ],
+                "summary": "Subscribe to a repository",
+                "parameters": [
+                    {
+                        "description": "Subscription details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.CreateSubscriptionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.CreateSubscriptionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Repository not found on GitHub",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Remove a subscription for a specific user and repository.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "subscriptions"
+                ],
+                "summary": "Unsubscribe from a repository",
+                "parameters": [
+                    {
+                        "description": "Unsubscribe details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.DeleteSubscriptionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.DeleteSubscriptionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.CreateSubscriptionRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "repository"
+            ],
+            "properties": {
+                "email": {
+                    "description": "User email address for notifications.",
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "repository": {
+                    "description": "GitHub repository full name (owner/repo).",
+                    "type": "string",
+                    "example": "golang/go"
+                }
+            }
+        },
+        "github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.CreateSubscriptionResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "The ID of the subscription in the database.",
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.DeleteSubscriptionRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "repository"
+            ],
+            "properties": {
+                "email": {
+                    "description": "Email address associated with the subscription.",
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "repository": {
+                    "description": "Repository name to unsubscribe from.",
+                    "type": "string",
+                    "example": "golang/go"
+                }
+            }
+        },
+        "github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.DeleteSubscriptionResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "description": "Status message confirming the operation.",
+                    "type": "string",
+                    "example": "Subscription deleted successfully"
+                }
+            }
+        },
+        "github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.ListSubscriptionsResponse": {
+            "type": "object",
+            "properties": {
+                "subscriptions": {
+                    "description": "List of the user's subscriptions.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.SubscriptionResponse"
+                    }
+                },
+                "total": {
+                    "description": "Good practice to return count.",
+                    "type": "integer",
+                    "example": 2
+                }
+            }
+        },
+        "github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.SubscriptionResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "description": "Timestamp when the subscription was created.",
+                    "type": "string",
+                    "example": "2026-04-08T18:00:00Z"
+                },
+                "email": {
+                    "description": "Subscriber's email address.",
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "id": {
+                    "description": "Unique identifier of the subscription.",
+                    "type": "integer",
+                    "example": 1
+                },
+                "repository_id": {
+                    "description": "Reference to the repository ID.",
+                    "type": "integer",
+                    "example": 101
+                }
+            }
+        }
+    }
+}

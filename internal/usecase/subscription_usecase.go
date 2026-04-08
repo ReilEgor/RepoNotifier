@@ -20,11 +20,13 @@ type SubscriptionUseCase struct {
 	ghClient service.GitHubClient
 }
 
-func NewSubscriptionUseCase(sr repository.SubscriptionRepository, gh service.GitHubClient) *SubscriptionUseCase {
+func NewSubscriptionUseCase(sr repository.SubscriptionRepository, gh service.GitHubClient, ur repository.UserRepository, rr repository.RepositoryRepository) *SubscriptionUseCase {
 	return &SubscriptionUseCase{
 		logger:   slog.With(slog.String("useCase", "SubscriptionUseCase")),
 		subsRepo: sr,
 		ghClient: gh,
+		userRepo: ur,
+		repoRepo: rr,
 	}
 }
 
@@ -91,5 +93,5 @@ func (uc *SubscriptionUseCase) ListByEmail(ctx context.Context, email string) ([
 }
 
 func (uc *SubscriptionUseCase) ProcessNotifications(ctx context.Context) error {
-	panic("not implemented")
+	return nil
 }

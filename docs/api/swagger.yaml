@@ -1,0 +1,186 @@
+basePath: /api/v1
+definitions:
+  github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.CreateSubscriptionRequest:
+    properties:
+      email:
+        description: User email address for notifications.
+        example: user@example.com
+        type: string
+      repository:
+        description: GitHub repository full name (owner/repo).
+        example: golang/go
+        type: string
+    required:
+    - email
+    - repository
+    type: object
+  github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.CreateSubscriptionResponse:
+    properties:
+      id:
+        description: The ID of the subscription in the database.
+        example: 1
+        type: integer
+    type: object
+  github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.DeleteSubscriptionRequest:
+    properties:
+      email:
+        description: Email address associated with the subscription.
+        example: user@example.com
+        type: string
+      repository:
+        description: Repository name to unsubscribe from.
+        example: golang/go
+        type: string
+    required:
+    - email
+    - repository
+    type: object
+  github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.DeleteSubscriptionResponse:
+    properties:
+      message:
+        description: Status message confirming the operation.
+        example: Subscription deleted successfully
+        type: string
+    type: object
+  github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.ListSubscriptionsResponse:
+    properties:
+      subscriptions:
+        description: List of the user's subscriptions.
+        items:
+          $ref: '#/definitions/github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.SubscriptionResponse'
+        type: array
+      total:
+        description: Good practice to return count.
+        example: 2
+        type: integer
+    type: object
+  github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.SubscriptionResponse:
+    properties:
+      created_at:
+        description: Timestamp when the subscription was created.
+        example: "2026-04-08T18:00:00Z"
+        type: string
+      email:
+        description: Subscriber's email address.
+        example: user@example.com
+        type: string
+      id:
+        description: Unique identifier of the subscription.
+        example: 1
+        type: integer
+      repository_id:
+        description: Reference to the repository ID.
+        example: 101
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  version: "1.0"
+paths:
+  /subscriptions:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a subscription for a specific user and repository.
+      parameters:
+      - description: Unsubscribe details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.DeleteSubscriptionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.DeleteSubscriptionResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Unsubscribe from a repository
+      tags:
+      - subscriptions
+    get:
+      description: Get a list of all repositories the user is currently subscribed
+        to.
+      parameters:
+      - description: User email address
+        in: query
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.ListSubscriptionsResponse'
+        "400":
+          description: Email is required
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List user subscriptions
+      tags:
+      - subscriptions
+    post:
+      consumes:
+      - application/json
+      description: Create a subscription for a user to track the latest releases of
+        a GitHub repository.
+      parameters:
+      - description: Subscription details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.CreateSubscriptionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.CreateSubscriptionResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Repository not found on GitHub
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Subscribe to a repository
+      tags:
+      - subscriptions
+swagger: "2.0"

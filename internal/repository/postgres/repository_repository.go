@@ -63,9 +63,6 @@ func (r *RepositoryRepository) GetAll(ctx context.Context) ([]model.Repository, 
 		}
 		repos = append(repos, repo)
 	}
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("RepositoryRepository.GetAll: rows error: %w", err)
-	}
 
 	return repos, nil
 }

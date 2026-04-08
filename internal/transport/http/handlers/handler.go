@@ -33,9 +33,9 @@ func (h *Handler) InitRoutes(router *gin.Engine) {
 	{
 		subscriptions := api.Group("/subscriptions")
 		{
-			subscriptions.POST("/", h.Subscribe)
-			subscriptions.DELETE("/", h.Unsubscribe)
-			subscriptions.GET("/", h.ListSubscriptions)
+			subscriptions.POST("", h.Subscribe)
+			subscriptions.DELETE("", h.Unsubscribe)
+			subscriptions.GET("", h.ListSubscriptions)
 		}
 	}
 }
