@@ -8,10 +8,11 @@ import (
 )
 
 var (
-	ErrRateLimitExceeded  = errors.New("github api rate limit exceeded")
-	ErrRepositoryNotFound = errors.New("repository not found")
-	ErrNoReleasesFound    = errors.New("no releases found for this repository")
-	ErrGitHubUnavailable  = errors.New("github service is temporarily unavailable")
+	ErrRateLimitExceeded    = errors.New("github api rate limit exceeded")
+	ErrRepositoryNotFound   = errors.New("repository not found")
+	ErrReleaseNotFound      = errors.New("no releases found for this repository")
+	ErrGitHubUnavailable    = errors.New("github service is temporarily unavailable")
+	ErrFetchFromExternalAPI = errors.New("failed to fetch data from external API")
 )
 
 type GitHubClient interface {
