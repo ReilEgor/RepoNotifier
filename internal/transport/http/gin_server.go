@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/ReilEgor/RepoNotifier/internal/domain/usecase"
+	handler "github.com/ReilEgor/RepoNotifier/internal/transport/http/handlers"
 	"github.com/ReilEgor/RepoNotifier/internal/transport/http/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
@@ -15,14 +16,14 @@ import (
 
 type GinServer struct {
 	router         *gin.Engine
-	subscriptionUC *usecase.SubscriptionUseCase
-	userUC         *usecase.UserUseCase
+	subscriptionUC usecase.SubscriptionUseCase
+	userUC         usecase.UserUseCase
 	logger         *slog.Logger
 }
 
 func NewGinServer(
-	subscriptionUC *usecase.SubscriptionUseCase,
-	userUC *usecase.UserUseCase,
+	subscriptionUC usecase.SubscriptionUseCase,
+	userUC usecase.UserUseCase,
 	redisClient *redis.Client,
 ) *GinServer {
 	router := gin.New()
@@ -36,7 +37,7 @@ func NewGinServer(
 		logger:         logger,
 	}
 
-	h := handler.NewHandler(uc)
+	h := handler.NewHandler(subscriptionUC, userUC)
 	h.InitRoutes(s.router)
 
 	return s

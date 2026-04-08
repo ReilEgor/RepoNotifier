@@ -11,12 +11,12 @@ import (
 )
 
 type Handler struct {
-	subscriptionUC *usecase.SubscriptionUseCase
-	userUC         *usecase.UserUseCase
+	subscriptionUC usecase.SubscriptionUseCase
+	userUC         usecase.UserUseCase
 	logger         *slog.Logger
 }
 
-func NewHandler(subscriptionUC *usecase.SubscriptionUseCase, userUC *usecase.UserUseCase) *Handler {
+func NewHandler(subscriptionUC usecase.SubscriptionUseCase, userUC usecase.UserUseCase) *Handler {
 	return &Handler{
 		subscriptionUC: subscriptionUC,
 		userUC:         userUC,

@@ -20,10 +20,10 @@ func NewSubscriptionRepository(db *pgxpool.Pool) *SubscriptionRepository {
 	}
 }
 
-func (r *SubscriptionRepository) Create(ctx context.Context, sub *model.Subscription) error {
+func (r *SubscriptionRepository) Create(ctx context.Context, sub *model.Subscription) (int64, error) {
 	panic("not implemented")
 }
-func (r *SubscriptionRepository) Delete(ctx context.Context, email, repo string) error {
+func (r *SubscriptionRepository) Delete(ctx context.Context, userID int64, repo string) error {
 	panic("not implemented")
 }
 
@@ -31,5 +31,8 @@ func (r *SubscriptionRepository) GetByRepo(ctx context.Context, repo string) ([]
 	panic("not implemented")
 }
 func (r *SubscriptionRepository) GetAll(ctx context.Context) ([]model.Subscription, error) {
+	panic("not implemented")
+}
+func (r *SubscriptionRepository) GetByUserID(ctx context.Context, id int64) ([]model.Subscription, error) {
 	panic("not implemented")
 }

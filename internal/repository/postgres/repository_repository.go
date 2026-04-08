@@ -33,3 +33,6 @@ func (r *RepositoryRepository) GetAll(ctx context.Context) ([]model.Repository, 
 func (r *RepositoryRepository) UpdateLastSeenTag(ctx context.Context, name, tag string) error {
 	panic("not implemented")
 }
+func (r *RepositoryRepository) GetOrCreate(ctx context.Context, name string, tagName string) (*model.Repository, error) {
+	panic("not implemented")
+}

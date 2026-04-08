@@ -15,7 +15,24 @@ type CreateSubscriptionRequest struct {
 	Email      string `json:"email" binding:"required,email" example:"user@example.com"` // User email address for notifications.
 	Repository string `json:"repository" binding:"required" example:"golang/go"`         // GitHub repository full name (owner/repo).
 }
+
+type CreateSubscriptionResponse struct {
+	ID int64 `json:"id" example:"1"` // The ID of the subscription in the database.
+}
+
+// DeleteSubscriptionRequest defines the params for removing an existing subscription.
 type DeleteSubscriptionRequest struct {
 	Email      string `json:"email" binding:"required,email" example:"user@example.com"` // Email address associated with the subscription.
 	Repository string `json:"repository" binding:"required" example:"golang/go"`         // Repository name to unsubscribe from.
+}
+
+// DeleteSubscriptionResponse defines the output after a successful unsubscription.
+type DeleteSubscriptionResponse struct {
+	Message string `json:"message" example:"Subscription deleted successfully"` // Status message confirming the operation.
+}
+
+// ListSubscriptionsResponse represents a collection of subscriptions.
+type ListSubscriptionsResponse struct {
+	Subscriptions []SubscriptionResponse `json:"subscriptions"`     // List of the user's subscriptions.
+	Total         int                    `json:"total" example:"2"` // Good practice to return count.
 }
