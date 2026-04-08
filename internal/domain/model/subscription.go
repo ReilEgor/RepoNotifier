@@ -4,7 +4,7 @@ import "time"
 
 type Subscription struct {
 	ID           int64
-	Email        string
+	UserID       int64
 	RepositoryID int64
 	CreatedAt    time.Time
 }

@@ -11,7 +11,7 @@ var (
 	ErrInvalidFormat     = errors.New("invalid repository format")
 )
 
-type SubscriptionUsecase interface {
+type SubscriptionUseCase interface {
 	Subscribe(ctx context.Context, email string, repoName string) error
 	Unsubscribe(ctx context.Context, email string, repoName string) error
 	ProcessNotifications(ctx context.Context) error
