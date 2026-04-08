@@ -4,21 +4,23 @@
 
 ---
 
-## ✨ Features
+## ⭐ Features
 
 - 🔔 **Automated Tracking** — Background scanner checks for new GitHub tags/releases using `last_seen_tag` logic.
-- 📧 **Email Notifications** — Immediate alerts sent to subscribers via SMTP/Email API upon new release detection.
-- 🛡️ **Rate Limit Awareness** — Intelligent GitHub API client that handles `429 Too Many Requests` and optimizes token usage.
-- 🏗️ **Clean Architecture** — Dependency injection and interface-driven design for high testability and maintainability.
+- 📫 **Email Notifications** — Immediate alerts sent to subscribers via SMTP/Email API upon new release detection.
+- 🛡 **Rate Limit Awareness** — Intelligent GitHub API client that handles `429 Too Many Requests` and optimizes token usage.
+- 🏢 **Clean Architecture** — Dependency injection and interface-driven design for high testability and maintainability.
 - 🚀 **Dual Interface** — RESTful API for web integration and gRPC for high-performance internal communication.
-- 📊 **Monitoring** — Native Prometheus metrics endpoint (`/metrics`) to track system health and notification stats.
+- 🖥 **Monitoring** — Native Prometheus metrics endpoint (`/metrics`) to track system health and notification stats.
 
 ---
 
-## 🏗️ Architecture (C4 Context)
+## 🏢 Architecture (C4 Context)
 <img width="4524" height="1768" alt="image" src="https://github.com/user-attachments/assets/15231bf2-ac06-43d8-b861-b3b8e1e63163" />
 <img width="7400" height="3444" alt="image" src="https://github.com/user-attachments/assets/cc60b912-f9e4-4bb4-b371-85b2a8344b45" />
 
+## 🏢 Architecture (DB)
+<img width="610" height="611" alt="image" src="https://github.com/user-attachments/assets/d5c976f6-c963-45e8-9424-d77bea9bdf9b" />
 
 The service follows **Clean Architecture** principles:
 
