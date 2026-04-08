@@ -31,10 +31,11 @@ func (h *Handler) InitRoutes(router *gin.Engine) {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	api := router.Group("/api/v1")
 	{
-		_ = api
-		//currency := api.Group("/currency")
-		//{
-		//currency.POST("/convert", h.ConvertCurrency)
-		//}
+		subscriptions := api.Group("/subscriptions")
+		{
+			subscriptions.POST("/", h.Subscribe)
+			subscriptions.DELETE("/", h.Unsubscribe)
+			subscriptions.GET("/", h.ListSubscriptions)
+		}
 	}
 }
