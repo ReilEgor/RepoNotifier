@@ -13,20 +13,28 @@ import (
 )
 
 type SubscriptionUseCase struct {
-	logger   *slog.Logger
-	subsRepo repository.SubscriptionRepository
-	userRepo repository.UserRepository
-	repoRepo repository.RepositoryRepository
-	ghClient service.GitHubClient
+	logger      *slog.Logger
+	subsRepo    repository.SubscriptionRepository
+	userRepo    repository.UserRepository
+	repoRepo    repository.RepositoryRepository
+	emailSender service.EmailSender
+	ghClient    service.GitHubClient
 }
 
-func NewSubscriptionUseCase(sr repository.SubscriptionRepository, gh service.GitHubClient, ur repository.UserRepository, rr repository.RepositoryRepository) *SubscriptionUseCase {
+func NewSubscriptionUseCase(
+	sr repository.SubscriptionRepository,
+	gh service.GitHubClient,
+	ur repository.UserRepository,
+	rr repository.RepositoryRepository,
+	es service.EmailSender,
+) *SubscriptionUseCase {
 	return &SubscriptionUseCase{
-		logger:   slog.With(slog.String("useCase", "SubscriptionUseCase")),
-		subsRepo: sr,
-		ghClient: gh,
-		userRepo: ur,
-		repoRepo: rr,
+		logger:      slog.With(slog.String("useCase", "SubscriptionUseCase")),
+		subsRepo:    sr,
+		ghClient:    gh,
+		userRepo:    ur,
+		repoRepo:    rr,
+		emailSender: es,
 	}
 }
 
@@ -135,8 +143,12 @@ func (uc *SubscriptionUseCase) ProcessNotifications(ctx context.Context) error {
 
 		for _, email := range emails {
 			go func(e, r, t string) {
-				// uc.emailSender.SendNotification(e, r, t)
-				uc.logger.Info("notification sent", slog.String("to", e), slog.String("repo", r))
+				err := uc.emailSender.SendNotification(ctx, e, r, t)
+				if err != nil {
+					uc.logger.Error("failed to send email",
+						slog.String("to", e),
+						slog.String("err", err.Error()))
+				}
 			}(email, repo.FullName, latestRelease.TagName)
 		}
 	}

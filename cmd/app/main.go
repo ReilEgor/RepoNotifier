@@ -38,6 +38,7 @@ func main() {
 	defer stop()
 	app, cleanup, err := InitializeApp(
 		ctx, cfg.RedisHost, cfg.RedisPort, cfg.RedisPassword, 0, cfg.DSN,
+		cfg.EmailHost, cfg.EmailPort, cfg.EmailPassword, cfg.EmailFrom, cfg.EmailUser,
 	)
 	defer cleanup()
 

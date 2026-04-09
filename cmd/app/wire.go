@@ -11,6 +11,7 @@ import (
 	servicesInterface "github.com/ReilEgor/RepoNotifier/internal/domain/service"
 	usecaseInterface "github.com/ReilEgor/RepoNotifier/internal/domain/usecase"
 	cacheRealization "github.com/ReilEgor/RepoNotifier/internal/infrastructure/cache/redis"
+	servicesRealizationEmail "github.com/ReilEgor/RepoNotifier/internal/infrastructure/clients/email"
 	servicesRealizationGitHub "github.com/ReilEgor/RepoNotifier/internal/infrastructure/clients/github"
 	repository "github.com/ReilEgor/RepoNotifier/internal/infrastructure/storage/postgres"
 	repositoryRealization "github.com/ReilEgor/RepoNotifier/internal/repository/postgres"
@@ -49,6 +50,8 @@ var CacheSet = wire.NewSet(
 )
 var ServicesSet = wire.NewSet(
 	servicesRealizationGitHub.NewGitHubClient,
+	servicesRealizationEmail.NewSmtpClient,
+	wire.Bind(new(servicesInterface.EmailSender), new(*servicesRealizationEmail.SmtpClient)),
 	wire.Bind(new(servicesInterface.GitHubClient), new(*servicesRealizationGitHub.GitHubClient)),
 )
 
@@ -64,6 +67,11 @@ func InitializeApp(
 	redisPassword config.RedisPasswordType,
 	redisDB int,
 	dsn config.DSNType,
+	emailHost config.EmailHostType,
+	emailPort config.EmailPortType,
+	emailPassword config.EmailPasswordType,
+	emailFrom config.EmailFromType,
+	emailUser config.EmailUserType,
 ) (*App, func(), error) {
 	wire.Build(
 		ServicesSet,
