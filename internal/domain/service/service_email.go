@@ -6,10 +6,9 @@ import (
 )
 
 var (
-	ErrEmailRateLimit   = errors.New("email provider rate limit reached")
-	ErrInvalidRecipient = errors.New("invalid recipient email address")
-	ErrSMTPUnavailable  = errors.New("smtp server is unreachable")
-	ErrAuthFailed       = errors.New("email service authentication failed")
+	ErrEmailRateLimit  = errors.New("email provider rate limit reached")
+	ErrSMTPUnavailable = errors.New("email server is unreachable")
+	ErrAuthFailed      = errors.New("email service authentication failed")
 )
 
 type EmailSender interface {
