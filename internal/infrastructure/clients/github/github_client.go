@@ -81,7 +81,7 @@ func (c *GitHubClient) RepoExists(ctx context.Context, fullName string) (bool, e
 	}
 	if cached != "" {
 		log.DebugContext(ctx, "cache hit", slog.String("key", cacheKey))
-		return cached == "true", nil
+		//return cached == "true", nil
 	}
 	log.DebugContext(ctx, "cache miss", slog.String("key", cacheKey))
 
@@ -148,7 +148,7 @@ func (c *GitHubClient) GetLatestRelease(ctx context.Context, fullName string) (*
 			)
 		} else {
 			log.DebugContext(ctx, "cache hit", slog.String("key", cacheKey))
-			return &info, nil
+			//return &info, nil
 		}
 	} else {
 		log.DebugContext(ctx, "cache miss", slog.String("key", cacheKey))

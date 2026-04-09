@@ -3,10 +3,14 @@ package main
 import (
 	"context"
 	_ "context"
+	"errors"
+	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/ReilEgor/RepoNotifier/internal/config"
 	"github.com/caarlos0/env/v11"
@@ -39,7 +43,32 @@ func main() {
 
 	errCh := make(chan error, 1)
 	go func() {
-		errCh <- app.Server.Run(ctx, ":"+string(cfg.HTTPPort))
+		addr := fmt.Sprintf(":%s", cfg.HTTPPort)
+		if err := app.Server.Run(ctx, addr); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			errCh <- fmt.Errorf("http server error: %w", err)
+		}
+	}()
+	go func() {
+		ticker := time.NewTicker(1 * time.Minute)
+		defer ticker.Stop()
+
+		logger.Info("initial notification check started")
+		if err := app.SubscriptionUseCase.ProcessNotifications(ctx); err != nil {
+			logger.Error("initial notification check failed", slog.Any("error", err))
+		}
+
+		for {
+			select {
+			case <-ctx.Done():
+				logger.Info("notification worker stopped")
+				return
+			case <-ticker.C:
+				logger.Info("running scheduled notification check")
+				if err := app.SubscriptionUseCase.ProcessNotifications(ctx); err != nil {
+					logger.Error("worker check failed", slog.Any("error", err))
+				}
+			}
+		}
 	}()
 
 	select {

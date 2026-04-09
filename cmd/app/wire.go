@@ -53,7 +53,8 @@ var ServicesSet = wire.NewSet(
 )
 
 type App struct {
-	Server *http.GinServer
+	Server              *http.GinServer
+	SubscriptionUseCase usecaseInterface.SubscriptionUseCase
 }
 
 func InitializeApp(

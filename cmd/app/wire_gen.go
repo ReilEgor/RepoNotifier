@@ -47,7 +47,8 @@ func InitializeApp(ctx context.Context, redisHost config.RedisHostType, redisPor
 	userUseCase := usecase.NewUserUseCase(userRepository)
 	ginServer := http.NewGinServer(subscriptionUseCase, userUseCase, client)
 	app := &App{
-		Server: ginServer,
+		Server:              ginServer,
+		SubscriptionUseCase: subscriptionUseCase,
 	}
 	return app, func() {
 		cleanup()
@@ -67,5 +68,6 @@ var CacheSet = wire.NewSet(redis.NewRedisClient, redis.NewCache, wire.Bind(new(s
 var ServicesSet = wire.NewSet(github.NewGitHubClient, wire.Bind(new(service.GitHubClient), new(*github.GitHubClient)))
 
 type App struct {
-	Server *http.GinServer
+	Server              *http.GinServer
+	SubscriptionUseCase usecase2.SubscriptionUseCase
 }

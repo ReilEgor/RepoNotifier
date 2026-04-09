@@ -13,4 +13,5 @@ type SubscriptionRepository interface {
 	GetByRepo(ctx context.Context, repo string) ([]model.Subscription, error)
 	GetAll(ctx context.Context) ([]model.Subscription, error)
 	GetByUserID(ctx context.Context, id int64) ([]model.Subscription, error)
+	GetEmailsByRepoID(ctx context.Context, repoID int64) ([]string, error)
 }
