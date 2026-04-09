@@ -13,6 +13,7 @@ import (
 	"github.com/ReilEgor/RepoNotifier/internal/domain/service"
 	usecase2 "github.com/ReilEgor/RepoNotifier/internal/domain/usecase"
 	"github.com/ReilEgor/RepoNotifier/internal/infrastructure/cache/redis"
+	"github.com/ReilEgor/RepoNotifier/internal/infrastructure/clients/email"
 	"github.com/ReilEgor/RepoNotifier/internal/infrastructure/clients/github"
 	"github.com/ReilEgor/RepoNotifier/internal/infrastructure/storage/postgres"
 	postgres2 "github.com/ReilEgor/RepoNotifier/internal/repository/postgres"
@@ -28,7 +29,7 @@ import (
 
 // Injectors from wire.go:
 
-func InitializeApp(ctx context.Context, redisHost config.RedisHostType, redisPort config.RedisPortType, redisPassword config.RedisPasswordType, redisDB int, dsn config.DSNType) (*App, func(), error) {
+func InitializeApp(ctx context.Context, redisHost config.RedisHostType, redisPort config.RedisPortType, redisPassword config.RedisPasswordType, redisDB int, dsn config.DSNType, emailHost config.EmailHostType, emailPort config.EmailPortType, emailPassword config.EmailPasswordType, emailFrom config.EmailFromType, emailUser config.EmailUserType) (*App, func(), error) {
 	pool, cleanup, err := postgres.New(ctx, dsn)
 	if err != nil {
 		return nil, nil, err
@@ -43,7 +44,8 @@ func InitializeApp(ctx context.Context, redisHost config.RedisHostType, redisPor
 	gitHubClient := github.NewGitHubClient(cache)
 	userRepository := postgres2.NewUserRepository(pool)
 	repositoryRepository := postgres2.NewRepositoryRepository(pool)
-	subscriptionUseCase := usecase.NewSubscriptionUseCase(subscriptionRepository, gitHubClient, userRepository, repositoryRepository)
+	smtpClient := email.NewSmtpClient(emailHost, emailPort, emailFrom, emailPassword, emailUser)
+	subscriptionUseCase := usecase.NewSubscriptionUseCase(subscriptionRepository, gitHubClient, userRepository, repositoryRepository, smtpClient)
 	userUseCase := usecase.NewUserUseCase(userRepository)
 	ginServer := http.NewGinServer(subscriptionUseCase, userUseCase, client)
 	app := &App{
@@ -65,7 +67,7 @@ var RestSet = wire.NewSet(http.NewGinServer, handlers.NewHandler)
 
 var CacheSet = wire.NewSet(redis.NewRedisClient, redis.NewCache, wire.Bind(new(service.Cache), new(*redis.Cache)))
 
-var ServicesSet = wire.NewSet(github.NewGitHubClient, wire.Bind(new(service.GitHubClient), new(*github.GitHubClient)))
+var ServicesSet = wire.NewSet(github.NewGitHubClient, email.NewSmtpClient, wire.Bind(new(service.EmailSender), new(*email.SmtpClient)), wire.Bind(new(service.GitHubClient), new(*github.GitHubClient)))
 
 type App struct {
 	Server              *http.GinServer
