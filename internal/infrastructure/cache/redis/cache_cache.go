@@ -2,9 +2,12 @@ package redis
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"log/slog"
 	"time"
 
+	"github.com/ReilEgor/RepoNotifier/internal/domain/service"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -13,31 +16,45 @@ type Cache struct {
 	logger *slog.Logger
 }
 
+const (
+	componentCache = "Cache"
+
+	errMsgCacheGet = "cache get error"
+	errMsgCacheSet = "cache set error"
+)
+
 func NewCache(client *redis.Client) *Cache {
 	return &Cache{
 		client: client,
-		logger: slog.With(slog.String("component", "Cache")),
+		logger: slog.With(slog.String("component", componentCache)),
 	}
 }
 func (c *Cache) Get(ctx context.Context, key string) (string, error) {
-	if err := c.client.Get(ctx, key).Err(); err != nil {
-		if err == redis.Nil {
-			return "", nil
-		}
-		c.logger.Error("cache get error", "key", key, "error", err)
-		return "", err
-	}
+	const op = "Cache.Get"
+	log := c.logger.With(slog.String("op", op))
 	value, err := c.client.Get(ctx, key).Result()
 	if err != nil {
-		c.logger.Error("cache get error", "key", key, "error", err)
-		return "", err
+		if errors.Is(err, redis.Nil) {
+			return "", service.ErrCacheMiss
+		}
+		log.ErrorContext(ctx, errMsgCacheGet,
+			slog.String("key", key),
+			slog.String("error", err.Error()),
+		)
+		return "", fmt.Errorf("redis get: %w", err)
 	}
 	return value, nil
 }
+
 func (c *Cache) Set(ctx context.Context, key string, value string, ttl time.Duration) error {
+	const op = "Cache.Set"
+	log := c.logger.With(slog.String("op", op))
 	if err := c.client.Set(ctx, key, value, ttl).Err(); err != nil {
-		c.logger.Error("cache set error", "key", key, "error", err)
-		return err
+		log.ErrorContext(ctx, errMsgCacheSet,
+			slog.String("key", key),
+			slog.String("error", err.Error()),
+		)
+		return fmt.Errorf("%s: %w", op, err)
 	}
 	return nil
 }
