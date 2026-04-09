@@ -40,3 +40,9 @@ The service follows **Clean Architecture** principles:
 5. If a new tag is detected:
    - Email notification is sent
    - `last_seen_tag` is updated
+
+---
+
+## 📫 Example
+
+<img width="670" height="416" alt="image" src="https://github.com/user-attachments/assets/e83e2d27-fd6c-46ae-b2ea-6fb766c11e18" />
