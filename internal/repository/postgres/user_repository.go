@@ -11,6 +11,10 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+const (
+	componentUserRepository = "UserRepository"
+)
+
 type UserRepository struct {
 	db     *pgxpool.Pool
 	logger *slog.Logger
@@ -19,39 +23,59 @@ type UserRepository struct {
 func NewUserRepository(db *pgxpool.Pool) *UserRepository {
 	return &UserRepository{
 		db:     db,
-		logger: slog.With(slog.String("component", "UserRepository")),
+		logger: slog.With(slog.String("component", componentUserRepository)),
 	}
 }
 
-const getByEmailQuery = `SELECT id, email, created_at FROM users WHERE email = $1`
+const getByEmailUserRepositoryQuery = `SELECT id, email, created_at FROM users WHERE email = $1`
 
 func (r *UserRepository) GetByEmail(ctx context.Context, email string) (model.User, error) {
+	const op = "UserRepository.GetByEmail"
+	log := r.logger.With(slog.String("op", op))
+
 	var user model.User
-	err := r.db.QueryRow(ctx, getByEmailQuery, email).Scan(&user.ID, &user.Email, &user.CreatedAt)
+	err := r.db.QueryRow(ctx, getByEmailUserRepositoryQuery, email).Scan(&user.ID, &user.Email, &user.CreatedAt)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return model.User{}, fmt.Errorf("%s: user not found", "UserRepository.GetByEmail")
+			log.DebugContext(ctx, "user not found",
+				slog.String("email", email),
+			)
+			return model.User{}, fmt.Errorf("%s: %w", op, model.ErrUserNotFound)
 		}
-		return model.User{}, fmt.Errorf("%s: %w", "UserRepository.GetByEmail", err)
+		log.ErrorContext(ctx, "query failed",
+			slog.String("email", email),
+			slog.String("error", err.Error()),
+		)
+		return model.User{}, fmt.Errorf("%s: query row: %w", op, err)
 	}
 
 	return user, nil
 }
 
-const createQuery = `INSERT INTO users (email) VALUES ($1) RETURNING id`
+const createUserRepositoryQuery = `INSERT INTO users (email) VALUES ($1) RETURNING id`
 
 func (r *UserRepository) Create(ctx context.Context, email string) (int64, error) {
+	const op = "UserRepository.Create"
+	log := r.logger.With(slog.String("op", op))
+
 	var id int64
-	err := r.db.QueryRow(ctx, createQuery, email).Scan(&id)
-	if err != nil {
-		return 0, fmt.Errorf("%s: %w", "UserRepository.Create", err)
+	if err := r.db.QueryRow(ctx, createUserRepositoryQuery, email).Scan(&id); err != nil {
+		log.ErrorContext(ctx, "query failed",
+			slog.String("email", email),
+			slog.String("error", err.Error()),
+		)
+		return 0, fmt.Errorf("%s: query row: %w", op, err)
 	}
 
+	log.DebugContext(ctx, "user created",
+		slog.String("email", email),
+		slog.Int64("id", id),
+	)
 	return id, nil
 }
 
-const getOrCreateQuery = `
+const getOrCreateUserRepositoryQuery = `
 	INSERT INTO users (email)
 	VALUES ($1)
 	ON CONFLICT (email) DO UPDATE SET email = EXCLUDED.email
@@ -59,11 +83,21 @@ const getOrCreateQuery = `
 `
 
 func (r *UserRepository) GetOrCreate(ctx context.Context, email string) (model.User, error) {
+	const op = "UserRepository.GetOrCreate"
+	log := r.logger.With(slog.String("op", op))
+
 	var user model.User
-	err := r.db.QueryRow(ctx, getOrCreateQuery, email).Scan(&user.ID, &user.Email, &user.CreatedAt)
-	if err != nil {
-		return model.User{}, fmt.Errorf("%s: %w", "UserRepository.GetOrCreate", err)
+	if err := r.db.QueryRow(ctx, getOrCreateUserRepositoryQuery, email).Scan(&user.ID, &user.Email, &user.CreatedAt); err != nil {
+		log.ErrorContext(ctx, "query failed",
+			slog.String("email", email),
+			slog.String("error", err.Error()),
+		)
+		return model.User{}, fmt.Errorf("%s: query row: %w", op, err)
 	}
 
+	log.DebugContext(ctx, "user get or created",
+		slog.String("email", email),
+		slog.Int64("id", user.ID),
+	)
 	return user, nil
 }
