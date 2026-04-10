@@ -82,6 +82,7 @@ type GitHubClient struct {
 	cache      service.Cache
 	logger     *slog.Logger
 	cb         *gobreaker.CircuitBreaker
+	apiBase    string
 }
 
 func NewGitHubClient(cache service.Cache) *GitHubClient {
@@ -107,6 +108,7 @@ func NewGitHubClient(cache service.Cache) *GitHubClient {
 		cache:      cache,
 		logger:     slog.With(slog.String("component", componentGithubClient)),
 		cb:         gobreaker.NewCircuitBreaker(settings),
+		apiBase:    githubAPIBase,
 	}
 }
 
@@ -118,11 +120,17 @@ func (c *GitHubClient) RepoExists(ctx context.Context, fullName string) (bool, e
 	if cached, ok, err := c.getCached(ctx, log, cacheKey); err != nil {
 		return false, fmt.Errorf("%s: cache get: %w", op, err)
 	} else if ok {
-		return cached == cacheValTrue, nil
+		if cached == cacheValTrue {
+			return true, nil
+		}
+		if cached == cacheValFalse {
+			return false, nil
+		}
+		log.WarnContext(ctx, "invalid cache value, falling back to api", slog.String("val", cached))
 	}
 
 	result, err := c.cb.Execute(func() (interface{}, error) {
-		url := fmt.Sprintf("%s/repos/%s", githubAPIBase, fullName)
+		url := fmt.Sprintf("%s/repos/%s", c.apiBase, fullName)
 		req, err := http.NewRequestWithContext(ctx, http.MethodHead, url, nil)
 		if err != nil {
 			return false, fmt.Errorf("create request: %w", err)
@@ -169,7 +177,7 @@ func (c *GitHubClient) RepoExists(ctx context.Context, fullName string) (bool, e
 			slog.String("key", cacheKey),
 			slog.String("error", err.Error()),
 		)
-		return false, fmt.Errorf("%s: cache set: %w", op, err)
+		//return false, fmt.Errorf("%s: cache set: %w", op, err)
 	}
 	log.InfoContext(ctx, "repo existence checked", slog.Bool("exists", exists))
 	return exists, nil
@@ -194,7 +202,7 @@ func (c *GitHubClient) GetLatestRelease(ctx context.Context, fullName string) (*
 		}
 	}
 
-	url := fmt.Sprintf("%s/repos/%s/releases/latest", githubAPIBase, fullName)
+	url := fmt.Sprintf("%s/repos/%s/releases/latest", c.apiBase, fullName)
 
 	result, err := c.cb.Execute(func() (interface{}, error) {
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
@@ -245,7 +253,6 @@ func (c *GitHubClient) GetLatestRelease(ctx context.Context, fullName string) (*
 	}
 	if err = c.cache.Set(ctx, cacheKey, string(jsonData), cacheTTL); err != nil {
 		log.ErrorContext(ctx, "cache set failed", slog.String("key", cacheKey), slog.Any("error", err))
-		return nil, err
 	}
 
 	log.InfoContext(ctx, "latest release fetched", slog.String("tag", info.TagName), slog.Time("published_at", info.PublishedAt))

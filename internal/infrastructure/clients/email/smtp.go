@@ -37,11 +37,12 @@ func (c *SmtpClient) buildMessage(to, repoName, tagName string) []byte {
 }
 
 type SmtpClient struct {
-	host   config.EmailHostType
-	port   config.EmailPortType
-	from   config.EmailFromType
-	auth   smtp.Auth
-	logger *slog.Logger
+	host     config.EmailHostType
+	port     config.EmailPortType
+	from     config.EmailFromType
+	auth     smtp.Auth
+	sendMail func(addr string, a smtp.Auth, from string, to []string, msg []byte) error
+	logger   *slog.Logger
 }
 
 func NewSmtpClient(
@@ -52,11 +53,12 @@ func NewSmtpClient(
 	user config.EmailUserType,
 ) *SmtpClient {
 	return &SmtpClient{
-		host:   host,
-		port:   port,
-		from:   from,
-		auth:   smtp.PlainAuth("", string(user), string(password), string(host)),
-		logger: slog.With(slog.String("component", componentEmailClient)),
+		host:     host,
+		port:     port,
+		from:     from,
+		auth:     smtp.PlainAuth("", string(user), string(password), string(host)),
+		logger:   slog.With(slog.String("component", componentEmailClient)),
+		sendMail: smtp.SendMail,
 	}
 }
 
@@ -66,7 +68,7 @@ func (c *SmtpClient) SendNotification(ctx context.Context, to string, repoName s
 
 	msg := c.buildMessage(to, repoName, tagName)
 	addr := fmt.Sprintf("%s:%s", c.host, c.port)
-	if err := smtp.SendMail(addr, c.auth, string(c.from), []string{to}, msg); err != nil {
+	if err := c.sendMail(addr, c.auth, string(c.from), []string{to}, msg); err != nil {
 		if strings.Contains(err.Error(), "535") || strings.Contains(err.Error(), "Authentication failed") {
 			log.ErrorContext(ctx, "smtp auth failed", slog.String("error", err.Error()))
 			return fmt.Errorf("%s: %w", op, service.ErrAuthFailed)

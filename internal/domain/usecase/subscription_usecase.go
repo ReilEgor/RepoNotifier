@@ -13,6 +13,7 @@ var (
 	ErrInvalidFormat     = errors.New("invalid repository format")
 )
 
+//go:generate mockery --name SubscriptionUseCase --output ../../mocks --case underscore --outpkg mocks
 type SubscriptionUseCase interface {
 	Subscribe(ctx context.Context, email string, repoName string) (int64, error)
 	Unsubscribe(ctx context.Context, email string, repoName string) error
