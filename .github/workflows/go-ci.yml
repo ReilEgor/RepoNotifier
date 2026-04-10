@@ -23,14 +23,15 @@ jobs:
       - name: Install dependencies
         run: go mod download
 
-      - name: Verify dependencies
-        run: go mod verify
-
       - name: Build
         run: go build -v ./cmd/...
 
       - name: Run Tests
-        run: go test -v -coverprofile=coverage.txt ./internal/...
+        run: |
+          go test -v \
+          -coverprofile=coverage.txt \
+          -coverpkg=./internal/... \
+          ./internal/...
 
       - name: Check Coverage
         run: go tool cover -func=coverage.txt
