@@ -30,7 +30,7 @@ func NewGinServer(
 ) *GinServer {
 	router := gin.New()
 	logger := slog.With(slog.String("component", "gin_server"))
-	middleware.SetupMiddleware(router, logger, redisClient, string(apiKey))
+	middleware.SetupMiddleware(router, logger, redisClient)
 
 	s := &GinServer{
 		router:         router,
@@ -39,7 +39,7 @@ func NewGinServer(
 		logger:         logger,
 	}
 
-	h := handler.NewHandler(subscriptionUC, userUC)
+	h := handler.NewHandler(subscriptionUC, userUC, string(apiKey))
 	h.InitRoutes(s.router)
 
 	return s
