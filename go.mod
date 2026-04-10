@@ -6,6 +6,7 @@ require (
 	github.com/caarlos0/env/v11 v11.4.0
 	github.com/gin-contrib/cors v1.7.7
 	github.com/gin-gonic/gin v1.12.0
+	github.com/go-redis/redismock/v9 v9.2.0
 	github.com/google/wire v0.7.0
 	github.com/jackc/pgx/v5 v5.9.1
 	github.com/redis/go-redis/v9 v9.18.0
@@ -16,6 +17,7 @@ require (
 	github.com/swaggo/swag v1.8.12
 	github.com/ulule/limiter/v3 v3.11.2
 	github.com/zsais/go-gin-prometheus v1.0.3
+	golang.org/x/sync v0.20.0
 )
 
 require (
@@ -71,7 +73,6 @@ require (
 	golang.org/x/arch v0.23.0 // indirect
 	golang.org/x/crypto v0.48.0 // indirect
 	golang.org/x/net v0.51.0 // indirect
-	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.41.0 // indirect
 	golang.org/x/text v0.35.0 // indirect
 	golang.org/x/tools v0.42.0 // indirect
