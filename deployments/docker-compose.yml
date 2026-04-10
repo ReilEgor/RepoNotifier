@@ -54,35 +54,6 @@ services:
       - internal
 
 # ============================
-# AUTH SERVICE
-# ============================
-  keycloak:
-    image: quay.io/keycloak/keycloak:22.0.1
-    container_name: keycloak
-    command: start-dev
-    restart: always
-    environment:
-      KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres:5432/${KEYCLOAK_DB_NAME:-keycloak}
-      KC_DB_USERNAME: ${POSTGRES_USER}
-      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
-      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
-      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
-      KC_HOSTNAME_STRICT: "false"
-      KC_HTTP_ENABLED: "true"
-    ports:
-      - "8081:8080"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    depends_on:
-      - postgres
-    networks:
-      - internal
-
-# ============================
 # BUSINESS SERVICES
 # ============================
   repo-notifier-service:
