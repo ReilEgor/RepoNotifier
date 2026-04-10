@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RepoNotifier</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 h-screen flex items-center justify-center">
+<div class="bg-white p-8 rounded-lg shadow-md w-96">
+    <h1 class="text-2xl font-bold mb-6 text-gray-800 text-center">RepoNotifier</h1>
+
+    <div id="message" class="hidden p-3 mb-4 rounded text-sm"></div>
+
+    <form id="subscribeForm" class="space-y-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700">apiKey</label>
+            <input type="text" id="apiKey" placeholder="simpleAPI" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Email</label>
+            <input type="email" id="email" placeholder="test@gmail.com" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Repository (owner/repo)</label>
+            <input type="text" id="repository" placeholder="golang/go" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+        </div>
+        <div class="flex space-x-2 pt-2">
+            <button type="button" id="btnSubscribe" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition font-medium">
+                Subscribe
+            </button>
+            <button type="button" id="btnUnsubscribe" class="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-red-500 hover:text-white transition font-medium">
+                Unsubscribe
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const msgDiv = document.getElementById('message');
+    const apiKeyInput = document.getElementById('apiKey');
+    const emailInput = document.getElementById('email');
+    const repoInput = document.getElementById('repository');
+
+    async function sendRequest(method) {
+        const email = emailInput.value;
+        const repository = repoInput.value;
+        const apiKey = apiKeyInput.value;
+
+        if (!email || !repository || !apiKey) {
+            showMsg('Please fill all fields', 'bg-yellow-100 text-yellow-700');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/v1/subscriptions', {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-API-Key': apiKey
+                },
+                body: JSON.stringify({ email, repository })
+            });
+
+            const data = await response.json().catch(() => ({}));
+
+            if (response.ok) {
+                const action = method === 'POST' ? 'subscribed to' : 'unsubscribed from';
+                showMsg(`Successfully ${action} ${repository}`, 'bg-green-100 text-green-700');
+            } else {
+                showMsg(data.error || `Error: ${response.status}`, 'bg-red-100 text-red-700');
+            }
+        } catch (err) {
+            showMsg('Connection error: ' + err.message, 'bg-red-100 text-red-700');
+        }
+    }
+
+    document.getElementById('btnSubscribe').addEventListener('click', () => sendRequest('POST'));
+    document.getElementById('btnUnsubscribe').addEventListener('click', () => sendRequest('DELETE'));
+
+    function showMsg(text, classes) {
+        msgDiv.innerText = text;
+        msgDiv.className = `p-3 mb-4 rounded text-sm ${classes}`;
+        msgDiv.classList.remove('hidden');
+    }
+</script>
+</body>
+</html>

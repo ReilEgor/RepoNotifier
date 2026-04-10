@@ -32,6 +32,7 @@ func (h *Handler) InitRoutes(router *gin.Engine) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	router.StaticFile("/", "./static/index.html")
 	api := router.Group("/api/v1")
 	api.Use(middleware.AuthMiddleware(h.apiKey))
 	{

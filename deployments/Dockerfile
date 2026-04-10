@@ -15,7 +15,7 @@ RUN go build -o bin/repo_notifier ./cmd/app/
 FROM alpine:3.18
 
 WORKDIR /app
-
+COPY --from=builder /app/static ./static
 COPY --from=builder /app/bin/repo_notifier .
 
 RUN mkdir -p /app/data
