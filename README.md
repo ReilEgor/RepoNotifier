@@ -64,7 +64,10 @@ It is designed with **Clean Architecture**, strong **resilience patterns**, and 
   - Circuit Breaker (gobreaker)
   - Retry strategy
   - Graceful shutdown
-
+    
+- 🔐 API Authentication
+  To ensure security, all sensitive API endpoints are protected using **API Key Authentication**.
+  Every request (except public ones like Swagger or Healthcheck) must include the `X-API-Key` header.
 ---
 
 ## 🏗 Architecture
