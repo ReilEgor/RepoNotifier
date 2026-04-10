@@ -165,7 +165,9 @@ func TestGitHubClient_GetLatestRelease(t *testing.T) {
 					PublishedAt: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
 				}
 				w.WriteHeader(http.StatusOK)
-				json.NewEncoder(w).Encode(resp)
+				if err := json.NewEncoder(w).Encode(resp); err != nil {
+					t.Errorf("failed to encode response: %v", err)
+				}
 			},
 			expectedResult: &model.ReleaseInfo{
 				TagName:     "v1.22.0",
@@ -209,7 +211,7 @@ func TestGitHubClient_GetLatestRelease(t *testing.T) {
 			},
 			serverHandler: func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(`{"message": "something went wrong on github"}`))
+				_, _ = w.Write([]byte(`{"message": "something went wrong on github"}`))
 			},
 			expectedErr: ErrUnexpectedStatus,
 		},
@@ -224,7 +226,7 @@ func TestGitHubClient_GetLatestRelease(t *testing.T) {
 			serverHandler: func(w http.ResponseWriter, r *http.Request) {
 				resp := model.ReleaseInfo{TagName: "v1.22.0"}
 				w.WriteHeader(http.StatusOK)
-				json.NewEncoder(w).Encode(resp)
+				_ = json.NewEncoder(w).Encode(resp)
 			},
 			expectedResult: &model.ReleaseInfo{TagName: "v1.22.0"},
 			expectedErr:    nil,
@@ -244,7 +246,8 @@ func TestGitHubClient_GetLatestRelease(t *testing.T) {
 					PublishedAt: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
 				}
 				w.WriteHeader(http.StatusOK)
-				json.NewEncoder(w).Encode(resp)
+
+				_ = json.NewEncoder(w).Encode(resp)
 			},
 			expectedResult: &model.ReleaseInfo{
 				TagName:     "v1.22.0",

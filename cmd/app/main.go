@@ -40,6 +40,12 @@ func main() {
 		ctx, cfg.RedisHost, cfg.RedisPort, cfg.RedisPassword, 0, cfg.DSN,
 		cfg.EmailHost, cfg.EmailPort, cfg.EmailPassword, cfg.EmailFrom, cfg.EmailUser,
 	)
+	if err != nil {
+		logger.Error("application initialization failed",
+			slog.Any("error", err),
+		)
+		os.Exit(1)
+	}
 	defer cleanup()
 
 	errCh := make(chan error, 1)

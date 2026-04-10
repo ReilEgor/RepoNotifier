@@ -15,8 +15,6 @@ import (
 
 const (
 	componentSubscriptionUseCase = "SubscriptionUseCase"
-
-	repoCheckTimeout = 10 * time.Second
 )
 
 const (
