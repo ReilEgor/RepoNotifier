@@ -1,43 +1,37 @@
-name: Go CI
+name: CI
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ main, master, develop ]
+    branches: [ "main" ]
 
 jobs:
   test:
+    name: Run Tests
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Go
+      - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.23'
-          cache: true
 
-      - name: Install dependencies
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Download dependencies
         run: go mod download
 
-      - name: Build
-        run: go build -v ./cmd/...
-
-      - name: Run Tests
-        run: |
-          go test -v \
-          -coverprofile=coverage.txt \
-          -coverpkg=./internal/... \
-          ./internal/...
-
-      - name: Check Coverage
-        run: go tool cover -func=coverage.txt
-
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage.txt
+      - name: Run tests
+        run: go test ./... -v
