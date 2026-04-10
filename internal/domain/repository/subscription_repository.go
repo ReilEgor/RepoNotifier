@@ -6,6 +6,7 @@ import (
 	"github.com/ReilEgor/RepoNotifier/internal/domain/model"
 )
 
+//go:generate mockery --name SubscriptionRepository --output ../../mocks --case underscore --outpkg mocks
 type SubscriptionRepository interface {
 	Create(ctx context.Context, sub *model.Subscription) (int64, error)
 	Delete(ctx context.Context, userID int64, repo string) error

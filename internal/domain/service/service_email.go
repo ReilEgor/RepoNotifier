@@ -11,6 +11,7 @@ var (
 	ErrAuthFailed      = errors.New("email service authentication failed")
 )
 
+//go:generate mockery --name EmailSender --output ../../mocks --case underscore --outpkg mocks
 type EmailSender interface {
 	SendNotification(ctx context.Context, to, subject, body string) error
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/ReilEgor/RepoNotifier/internal/domain/model"
 )
 
+//go:generate mockery --name RepositoryRepository --output ../../mocks --case underscore --outpkg mocks
 type RepositoryRepository interface {
 	Create(ctx context.Context, repo *model.Repository) error
 
