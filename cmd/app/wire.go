@@ -72,6 +72,7 @@ func InitializeApp(
 	emailPassword config.EmailPasswordType,
 	emailFrom config.EmailFromType,
 	emailUser config.EmailUserType,
+	apiKey config.ApiKeyType,
 ) (*App, func(), error) {
 	wire.Build(
 		ServicesSet,

@@ -69,6 +69,7 @@ func validateSubscription(email, repo string) error {
 // @Failure      400      {object}  map[string]string "Invalid request body"
 // @Failure      404      {object}  map[string]string "Repository not found on GitHub"
 // @Failure      500      {object}  map[string]string "Internal server error"
+// @Security ApiKeyAuth
 // @Router       /subscriptions [post]
 func (h *Handler) Subscribe(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), timeoutSubscribe)
@@ -132,6 +133,7 @@ func (h *Handler) Subscribe(c *gin.Context) {
 // @Success      200      {object}  dto.DeleteSubscriptionResponse
 // @Failure      400      {object}  map[string]string "Invalid request body"
 // @Failure      500      {object}  map[string]string "Internal server error"
+// @Security ApiKeyAuth
 // @Router       /subscriptions [delete]
 func (h *Handler) Unsubscribe(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), timeoutUnsubscribe)
@@ -179,6 +181,7 @@ func (h *Handler) Unsubscribe(c *gin.Context) {
 // @Success      200      {object}  dto.ListSubscriptionsResponse
 // @Failure      400      {object}  map[string]string "Email is required"
 // @Failure      500      {object}  map[string]string "Internal server error"
+// @Security ApiKeyAuth
 // @Router       /subscriptions [get]
 func (h *Handler) ListSubscriptions(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), timeoutList)

@@ -73,6 +73,7 @@ services:
       EMAIL_USER: ${EMAIL_USER}
       EMAIL_PASSWORD: ${EMAIL_PASSWORD}
       EMAIL_FROM: ${EMAIL_FROM}
+      APP_API_KEY: ${APP_API_KEY}
     ports:
       - "8080:8080"
     depends_on:

@@ -12,7 +12,7 @@ import (
 	"github.com/zsais/go-gin-prometheus"
 )
 
-func SetupMiddleware(router *gin.Engine, logger *slog.Logger, redisClient *redis.Client) {
+func SetupMiddleware(router *gin.Engine, logger *slog.Logger, redisClient *redis.Client, apiKey string) {
 	router.Use(customCORS())
 	p := ginprometheus.NewPrometheus("gin")
 	p.Use(router)
@@ -20,7 +20,7 @@ func SetupMiddleware(router *gin.Engine, logger *slog.Logger, redisClient *redis
 	router.Use(gin.Recovery())
 	router.Use(slogMiddleware(logger))
 	router.Use(Timeout(5 * time.Second))
-
+	router.Use(AuthMiddleware(apiKey))
 	rateLimiter, err := RateLimit(redisClient)
 	if err != nil {
 		logger.Error("failed to create rate limiter", "error", err)
@@ -33,7 +33,7 @@ func customCORS() gin.HandlerFunc {
 	return cors.New(cors.Config{
 		AllowAllOrigins: true,
 		AllowMethods:    []string{"POST", "GET", "OPTIONS", "PUT", "DELETE"},
-		AllowHeaders:    []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		AllowHeaders:    []string{"Origin", "Content-Type", "Accept", "Authorization", "Content-Type", "X-API-Key"},
 		ExposeHeaders:   []string{"Content-Length"},
 		MaxAge:          12 * time.Hour,
 	})

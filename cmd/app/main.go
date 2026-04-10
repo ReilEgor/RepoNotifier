@@ -17,9 +17,14 @@ import (
 )
 
 // Swagger Metadata for API Documentation
-// @title
-// @version         1.0
-// @description
+// @title RepoNotifier API
+// @version 1.0    	      1.0
+// @description Service for tracking GitHub releases.
+
+// @securityDefinitions.apiKey ApiKeyAuth
+// @in header
+// @name X-API-Key
+
 // @host      localhost:8080
 // @BasePath  /api/v1
 func main() {
@@ -39,6 +44,7 @@ func main() {
 	app, cleanup, err := InitializeApp(
 		ctx, cfg.RedisHost, cfg.RedisPort, cfg.RedisPassword, 0, cfg.DSN,
 		cfg.EmailHost, cfg.EmailPort, cfg.EmailPassword, cfg.EmailFrom, cfg.EmailUser,
+		cfg.ApiKey,
 	)
 	if err != nil {
 		logger.Error("application initialization failed",

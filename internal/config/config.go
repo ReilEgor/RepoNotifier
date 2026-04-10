@@ -13,6 +13,8 @@ type (
 	EmailPasswordType string
 	EmailFromType     string
 	EmailUserType     string
+
+	ApiKeyType string
 )
 type Config struct {
 	DSN           DSNType           `env:"DB_SOURCE" envDefault:"postgres://user:password@localhost:5432/userservice?sslmode=disable"`
@@ -26,4 +28,6 @@ type Config struct {
 	EmailPassword EmailPasswordType `env:"EMAIL_PASSWORD" envDefault:"smtp_password"`
 	EmailFrom     EmailFromType     `env:"EMAIL_FROM" envDefault:"smtp.example.com"`
 	EmailUser     EmailUserType     `env:"EMAIL_USER" envDefault:"smtp_user"`
+
+	ApiKey ApiKeyType `env:"APP_API_KEY" envDefault:"smtp_api_key"`
 }

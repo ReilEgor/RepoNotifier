@@ -1,14 +1,21 @@
 {
     "swagger": "2.0",
     "info": {
+        "description": "Service for tracking GitHub releases.",
+        "title": "RepoNotifier API",
         "contact": {},
-        "version": "1.0"
+        "version": "1.0    \t      1.0"
     },
     "host": "localhost:8080",
     "basePath": "/api/v1",
     "paths": {
         "/subscriptions": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a list of all repositories the user is currently subscribed to.",
                 "produces": [
                     "application/json"
@@ -54,6 +61,11 @@
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create a subscription for a user to track the latest releases of a GitHub repository.",
                 "consumes": [
                     "application/json"
@@ -113,6 +125,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Remove a subscription for a specific user and repository.",
                 "consumes": [
                     "application/json"
@@ -264,6 +281,13 @@
                     "example": 101
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "X-API-Key",
+            "in": "header"
         }
     }
 }

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/ReilEgor/RepoNotifier/internal/config"
 	"github.com/ReilEgor/RepoNotifier/internal/domain/usecase"
 	handler "github.com/ReilEgor/RepoNotifier/internal/transport/http/handlers"
 	"github.com/ReilEgor/RepoNotifier/internal/transport/http/middleware"
@@ -25,10 +26,11 @@ func NewGinServer(
 	subscriptionUC usecase.SubscriptionUseCase,
 	userUC usecase.UserUseCase,
 	redisClient *redis.Client,
+	apiKey config.ApiKeyType,
 ) *GinServer {
 	router := gin.New()
 	logger := slog.With(slog.String("component", "gin_server"))
-	middleware.SetupMiddleware(router, logger, redisClient)
+	middleware.SetupMiddleware(router, logger, redisClient, string(apiKey))
 
 	s := &GinServer{
 		router:         router,

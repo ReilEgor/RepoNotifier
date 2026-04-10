@@ -76,7 +76,9 @@ definitions:
 host: localhost:8080
 info:
   contact: {}
-  version: "1.0"
+  description: Service for tracking GitHub releases.
+  title: RepoNotifier API
+  version: "1.0    \t      1.0"
 paths:
   /subscriptions:
     delete:
@@ -109,6 +111,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Unsubscribe from a repository
       tags:
       - subscriptions
@@ -140,6 +144,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: List user subscriptions
       tags:
       - subscriptions
@@ -180,7 +186,14 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Subscribe to a repository
       tags:
       - subscriptions
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: X-API-Key
+    type: apiKey
 swagger: "2.0"

@@ -29,7 +29,7 @@ import (
 
 // Injectors from wire.go:
 
-func InitializeApp(ctx context.Context, redisHost config.RedisHostType, redisPort config.RedisPortType, redisPassword config.RedisPasswordType, redisDB int, dsn config.DSNType, emailHost config.EmailHostType, emailPort config.EmailPortType, emailPassword config.EmailPasswordType, emailFrom config.EmailFromType, emailUser config.EmailUserType) (*App, func(), error) {
+func InitializeApp(ctx context.Context, redisHost config.RedisHostType, redisPort config.RedisPortType, redisPassword config.RedisPasswordType, redisDB int, dsn config.DSNType, emailHost config.EmailHostType, emailPort config.EmailPortType, emailPassword config.EmailPasswordType, emailFrom config.EmailFromType, emailUser config.EmailUserType, apiKey config.ApiKeyType) (*App, func(), error) {
 	pool, cleanup, err := postgres.New(ctx, dsn)
 	if err != nil {
 		return nil, nil, err
@@ -47,7 +47,7 @@ func InitializeApp(ctx context.Context, redisHost config.RedisHostType, redisPor
 	smtpClient := email.NewSmtpClient(emailHost, emailPort, emailFrom, emailPassword, emailUser)
 	subscriptionUseCase := usecase.NewSubscriptionUseCase(subscriptionRepository, gitHubClient, userRepository, repositoryRepository, smtpClient)
 	userUseCase := usecase.NewUserUseCase(userRepository)
-	ginServer := http.NewGinServer(subscriptionUseCase, userUseCase, client)
+	ginServer := http.NewGinServer(subscriptionUseCase, userUseCase, client, apiKey)
 	app := &App{
 		Server:              ginServer,
 		SubscriptionUseCase: subscriptionUseCase,
