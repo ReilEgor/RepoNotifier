@@ -10,6 +10,7 @@ import (
 	"github.com/ReilEgor/RepoNotifier/internal/domain/model"
 	"github.com/ReilEgor/RepoNotifier/internal/domain/repository"
 	"github.com/ReilEgor/RepoNotifier/internal/domain/service"
+	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -194,17 +195,24 @@ func (uc *SubscriptionUseCase) ProcessNotifications(ctx context.Context) error {
 			continue
 		}
 
-		sendCtx := context.WithoutCancel(ctx)
+		g, sendCtx := errgroup.WithContext(context.Background())
+		g.SetLimit(10)
 		for _, email := range emails {
-			go func() {
+			g.Go(func() error {
 				if err := uc.emailSender.SendNotification(sendCtx, email, repo.FullName, latestRelease.TagName); err != nil {
 					log.ErrorContext(sendCtx, "failed to send email",
 						slog.String("to", email),
 						slog.String("error", err.Error()),
 					)
+					return nil
 				}
-			}()
+				return nil
+			})
+		}
+		if err := g.Wait(); err != nil {
+			log.Error("batch send failed", slog.String("error", err.Error()))
 		}
 	}
+
 	return nil
 }
