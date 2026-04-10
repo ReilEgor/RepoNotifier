@@ -4,6 +4,9 @@
 
 ---
 
+[![codecov](https://codecov.io/gh/ReilEgor/NotifierTest/graph/badge.svg?token=S8KWDBMUQ7)](https://codecov.io/gh/ReilEgor/NotifierTest)
+
+---
 ## ⚒ Core Stack
 
 ### Backend & API
