@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package subscription.v1;
+
+option go_package = "github.com/ReilEgor/RepoNotifier/internal/transport/grpc/proto/v1";
+
+service SubscriptionService {
+  rpc Subscribe(SubscribeRequest) returns (SubscribeResponse);
+  rpc Unsubscribe(UnsubscribeRequest) returns (UnsubscribeResponse);
+}
+
+message SubscribeRequest{
+  string email = 1;
+  string repository = 2;
+}
+
+message SubscribeResponse{
+  string message = 1;
+  bool success = 2;
+}
+
+message UnsubscribeRequest{
+  string email = 1;
+  string repository = 2;
+}
+
+message UnsubscribeResponse{
+  string message = 1;
+  bool success = 2;
+}

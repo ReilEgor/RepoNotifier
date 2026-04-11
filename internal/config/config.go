@@ -15,6 +15,8 @@ type (
 	EmailUserType     string
 
 	ApiKeyType string
+
+	GRPCPortType string
 )
 type Config struct {
 	DSN           DSNType           `env:"DB_SOURCE" envDefault:"postgres://user:password@localhost:5432/userservice?sslmode=disable"`
@@ -30,4 +32,6 @@ type Config struct {
 	EmailUser     EmailUserType     `env:"EMAIL_USER" envDefault:"smtp_user"`
 
 	ApiKey ApiKeyType `env:"APP_API_KEY" envDefault:"smtp_api_key"`
+
+	GRPCPort GRPCPortType `env:"GRPC_PORT" envDefault:"9090"`
 }
