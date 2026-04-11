@@ -20,6 +20,7 @@ import (
 	"github.com/ReilEgor/RepoNotifier/internal/transport/http/handlers"
 	usecaseRealization "github.com/ReilEgor/RepoNotifier/internal/usecase"
 	"github.com/google/wire"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
 )
 
@@ -35,6 +36,7 @@ var RepositorySet = wire.NewSet(
 	repositoryRealization.NewRepositoryRepository,
 	repositoryRealization.NewSubscriptionRepository,
 	repositoryRealization.NewUserRepository,
+	wire.Bind(new(repositoryRealization.PgxInterface), new(*pgxpool.Pool)),
 	wire.Bind(new(repositoryInterface.RepositoryRepository), new(*repositoryRealization.RepositoryRepository)),
 	wire.Bind(new(repositoryInterface.SubscriptionRepository), new(*repositoryRealization.SubscriptionRepository)),
 	wire.Bind(new(repositoryInterface.UserRepository), new(*repositoryRealization.UserRepository)),

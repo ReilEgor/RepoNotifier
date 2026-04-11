@@ -22,6 +22,7 @@ import (
 	"github.com/ReilEgor/RepoNotifier/internal/transport/http/handlers"
 	"github.com/ReilEgor/RepoNotifier/internal/usecase"
 	"github.com/google/wire"
+	"github.com/jackc/pgx/v5/pgxpool"
 	grpc2 "google.golang.org/grpc"
 )
 
@@ -66,7 +67,7 @@ func InitializeApp(ctx context.Context, redisHost config.RedisHostType, redisPor
 
 var UseCaseSet = wire.NewSet(usecase.NewSubscriptionUseCase, usecase.NewUserUseCase, wire.Bind(new(usecase2.UserUseCase), new(*usecase.UserUseCase)), wire.Bind(new(usecase2.SubscriptionUseCase), new(*usecase.SubscriptionUseCase)))
 
-var RepositorySet = wire.NewSet(postgres.New, postgres2.NewRepositoryRepository, postgres2.NewSubscriptionRepository, postgres2.NewUserRepository, wire.Bind(new(repository.RepositoryRepository), new(*postgres2.RepositoryRepository)), wire.Bind(new(repository.SubscriptionRepository), new(*postgres2.SubscriptionRepository)), wire.Bind(new(repository.UserRepository), new(*postgres2.UserRepository)))
+var RepositorySet = wire.NewSet(postgres.New, postgres2.NewRepositoryRepository, postgres2.NewSubscriptionRepository, postgres2.NewUserRepository, wire.Bind(new(postgres2.PgxInterface), new(*pgxpool.Pool)), wire.Bind(new(repository.RepositoryRepository), new(*postgres2.RepositoryRepository)), wire.Bind(new(repository.SubscriptionRepository), new(*postgres2.SubscriptionRepository)), wire.Bind(new(repository.UserRepository), new(*postgres2.UserRepository)))
 
 var RestSet = wire.NewSet(http.NewGinServer, handlers.NewHandler)
 

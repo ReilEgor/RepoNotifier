@@ -8,7 +8,6 @@ import (
 
 	"github.com/ReilEgor/RepoNotifier/internal/domain/model"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const (
@@ -21,11 +20,11 @@ var (
 )
 
 type RepositoryRepository struct {
-	db     *pgxpool.Pool
+	db     PgxInterface
 	logger *slog.Logger
 }
 
-func NewRepositoryRepository(db *pgxpool.Pool) *RepositoryRepository {
+func NewRepositoryRepository(db PgxInterface) *RepositoryRepository {
 	return &RepositoryRepository{
 		db:     db,
 		logger: slog.With(slog.String("component", componentRepositoryRepository)),
@@ -78,7 +77,7 @@ func (r *RepositoryRepository) GetAll(ctx context.Context) ([]model.Repository, 
 	}
 	defer rows.Close()
 
-	var repos []model.Repository
+	repos := make([]model.Repository, 0)
 	for rows.Next() {
 		var repo model.Repository
 		if err := rows.Scan(&repo.ID, &repo.FullName, &repo.LastSeenTag, &repo.UpdatedAt); err != nil {

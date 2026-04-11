@@ -6,7 +6,6 @@ import (
 	"log/slog"
 
 	"github.com/ReilEgor/RepoNotifier/internal/domain/model"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const (
@@ -14,11 +13,11 @@ const (
 )
 
 type SubscriptionRepository struct {
-	db     *pgxpool.Pool
+	db     PgxInterface
 	logger *slog.Logger
 }
 
-func NewSubscriptionRepository(db *pgxpool.Pool) *SubscriptionRepository {
+func NewSubscriptionRepository(db PgxInterface) *SubscriptionRepository {
 	return &SubscriptionRepository{
 		db:     db,
 		logger: slog.With(slog.String("component", componentSubscriptionRepository)),
@@ -162,7 +161,7 @@ func (r *SubscriptionRepository) GetEmailsByRepoID(ctx context.Context, repoID i
 	}
 	defer rows.Close()
 
-	var emails []string
+	emails := make([]string, 0)
 	for rows.Next() {
 		var email string
 		if err := rows.Scan(&email); err != nil {

@@ -8,7 +8,6 @@ import (
 
 	"github.com/ReilEgor/RepoNotifier/internal/domain/model"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const (
@@ -16,11 +15,11 @@ const (
 )
 
 type UserRepository struct {
-	db     *pgxpool.Pool
+	db     PgxInterface
 	logger *slog.Logger
 }
 
-func NewUserRepository(db *pgxpool.Pool) *UserRepository {
+func NewUserRepository(db PgxInterface) *UserRepository {
 	return &UserRepository{
 		db:     db,
 		logger: slog.With(slog.String("component", componentUserRepository)),
