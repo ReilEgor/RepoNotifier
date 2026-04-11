@@ -15,10 +15,12 @@ import (
 	servicesRealizationGitHub "github.com/ReilEgor/RepoNotifier/internal/infrastructure/clients/github"
 	repository "github.com/ReilEgor/RepoNotifier/internal/infrastructure/storage/postgres"
 	repositoryRealization "github.com/ReilEgor/RepoNotifier/internal/repository/postgres"
+	grpcTransport "github.com/ReilEgor/RepoNotifier/internal/transport/grpc"
 	"github.com/ReilEgor/RepoNotifier/internal/transport/http"
 	"github.com/ReilEgor/RepoNotifier/internal/transport/http/handlers"
 	usecaseRealization "github.com/ReilEgor/RepoNotifier/internal/usecase"
 	"github.com/google/wire"
+	"google.golang.org/grpc"
 )
 
 var UseCaseSet = wire.NewSet(
@@ -55,8 +57,14 @@ var ServicesSet = wire.NewSet(
 	wire.Bind(new(servicesInterface.GitHubClient), new(*servicesRealizationGitHub.GitHubClient)),
 )
 
+var GrpcSet = wire.NewSet(
+	grpcTransport.NewSubscriptionHandler,
+	grpcTransport.NewGrpcServer,
+)
+
 type App struct {
-	Server              *http.GinServer
+	HTTPServer          *http.GinServer
+	GrpcServer          *grpc.Server
 	SubscriptionUseCase usecaseInterface.SubscriptionUseCase
 }
 
@@ -80,6 +88,7 @@ func InitializeApp(
 		UseCaseSet,
 		CacheSet,
 		RestSet,
+		GrpcSet,
 		wire.Struct(new(App), "*"),
 	)
 	return nil, nil, nil

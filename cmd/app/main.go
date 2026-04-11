@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -31,6 +32,7 @@ func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 		Level: slog.LevelDebug,
 	}))
+	slog.SetDefault(logger)
 	var cfg config.Config
 	err := env.Parse(&cfg)
 	if err != nil {
@@ -57,8 +59,21 @@ func main() {
 	errCh := make(chan error, 1)
 	go func() {
 		addr := fmt.Sprintf(":%s", cfg.HTTPPort)
-		if err := app.Server.Run(ctx, addr); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		logger.Info("HTTP server starting", slog.String("addr", addr))
+		if err := app.HTTPServer.Run(ctx, addr); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			errCh <- fmt.Errorf("http server error: %w", err)
+		}
+	}()
+	go func() {
+		addr := fmt.Sprintf(":%s", cfg.GRPCPort)
+		lis, err := net.Listen("tcp", addr)
+		if err != nil {
+			errCh <- fmt.Errorf("gRPC listen error: %w", err)
+			return
+		}
+		logger.Info("gRPC server starting", slog.String("addr", addr))
+		if err := app.GrpcServer.Serve(lis); err != nil {
+			errCh <- fmt.Errorf("gRPC server error: %w", err)
 		}
 	}()
 	go func() {

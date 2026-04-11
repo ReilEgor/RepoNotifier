@@ -17,10 +17,12 @@ import (
 	"github.com/ReilEgor/RepoNotifier/internal/infrastructure/clients/github"
 	"github.com/ReilEgor/RepoNotifier/internal/infrastructure/storage/postgres"
 	postgres2 "github.com/ReilEgor/RepoNotifier/internal/repository/postgres"
+	"github.com/ReilEgor/RepoNotifier/internal/transport/grpc"
 	"github.com/ReilEgor/RepoNotifier/internal/transport/http"
 	"github.com/ReilEgor/RepoNotifier/internal/transport/http/handlers"
 	"github.com/ReilEgor/RepoNotifier/internal/usecase"
 	"github.com/google/wire"
+	grpc2 "google.golang.org/grpc"
 )
 
 import (
@@ -48,8 +50,11 @@ func InitializeApp(ctx context.Context, redisHost config.RedisHostType, redisPor
 	subscriptionUseCase := usecase.NewSubscriptionUseCase(subscriptionRepository, gitHubClient, userRepository, repositoryRepository, smtpClient)
 	userUseCase := usecase.NewUserUseCase(userRepository)
 	ginServer := http.NewGinServer(subscriptionUseCase, userUseCase, client, apiKey)
+	subscriptionHandler := grpc.NewSubscriptionHandler(subscriptionUseCase)
+	server := grpc.NewGrpcServer(subscriptionHandler, apiKey)
 	app := &App{
-		Server:              ginServer,
+		HTTPServer:          ginServer,
+		GrpcServer:          server,
 		SubscriptionUseCase: subscriptionUseCase,
 	}
 	return app, func() {
@@ -69,7 +74,10 @@ var CacheSet = wire.NewSet(redis.NewRedisClient, redis.NewCache, wire.Bind(new(s
 
 var ServicesSet = wire.NewSet(github.NewGitHubClient, email.NewSmtpClient, wire.Bind(new(service.EmailSender), new(*email.SmtpClient)), wire.Bind(new(service.GitHubClient), new(*github.GitHubClient)))
 
+var GrpcSet = wire.NewSet(grpc.NewSubscriptionHandler, grpc.NewGrpcServer)
+
 type App struct {
-	Server              *http.GinServer
+	HTTPServer          *http.GinServer
+	GrpcServer          *grpc2.Server
 	SubscriptionUseCase usecase2.SubscriptionUseCase
 }

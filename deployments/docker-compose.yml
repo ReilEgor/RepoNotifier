@@ -74,8 +74,10 @@ services:
       EMAIL_PASSWORD: ${EMAIL_PASSWORD}
       EMAIL_FROM: ${EMAIL_FROM}
       APP_API_KEY: ${APP_API_KEY}
+      GRPC_PORT: ${GRPC_PORT}
     ports:
       - "8080:8080"
+      - "50051:50051"
     depends_on:
       redis:
         condition: service_healthy
