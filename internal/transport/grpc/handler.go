@@ -28,7 +28,7 @@ func (h *SubscriptionHandler) Subscribe(ctx context.Context, req *pb.SubscribeRe
 	}
 
 	return &pb.SubscribeResponse{
-		Message: fmt.Sprintf("Successfully subscribed %s", id),
+		Message: fmt.Sprintf("Successfully subscribed %d", id),
 		Success: true,
 	}, nil
 }
