@@ -4,10 +4,11 @@ import "time"
 
 // SubscriptionResponse represents a user's subscription record.
 type SubscriptionResponse struct {
-	ID           int64     `json:"id" example:"1"`                            // Unique identifier of the subscription.
-	Email        string    `json:"email" example:"user@example.com"`          // Subscriber's email address.
-	RepositoryID int64     `json:"repository_id" example:"101"`               // Reference to the repository ID.
-	CreatedAt    time.Time `json:"created_at" example:"2026-04-08T18:00:00Z"` // Timestamp when the subscription was created.
+	ID             int64     `json:"id" example:"1"`                            // Unique identifier of the subscription.
+	Email          string    `json:"email" example:"user@example.com"`          // Subscriber's email address.
+	RepositoryID   int64     `json:"repository_id" example:"101"`               // Reference to the repository ID.
+	RepositoryName string    `json:"repository_name" example:"golang/go"`       // The name of the repository (extracted from FullName).
+	CreatedAt      time.Time `json:"created_at" example:"2026-04-08T18:00:00Z"` // Timestamp when the subscription was created.
 }
 
 // CreateSubscriptionRequest defines the input payload for creating a new subscription.

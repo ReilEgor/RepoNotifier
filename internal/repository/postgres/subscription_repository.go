@@ -111,7 +111,13 @@ func (r *SubscriptionRepository) GetAll(ctx context.Context) ([]model.Subscripti
 	return subs, nil
 }
 
-const getByUserIDSubscriptionQuery = `SELECT id, user_id, repository_id, created_at FROM subscriptions WHERE user_id = $1`
+const getByUserIDSubscriptionQuery = `
+    SELECT 
+        s.id, s.user_id, s.repository_id, r.full_name, s.created_at 
+    FROM subscriptions s
+    JOIN repositories r ON s.repository_id = r.id
+    WHERE s.user_id = $1
+`
 
 func (r *SubscriptionRepository) GetByUserID(ctx context.Context, id int64) ([]model.Subscription, error) {
 	const op = "SubscriptionRepository.GetByUserID"
@@ -124,10 +130,17 @@ func (r *SubscriptionRepository) GetByUserID(ctx context.Context, id int64) ([]m
 	}
 	defer rows.Close()
 
-	var subs []model.Subscription
+	subs := make([]model.Subscription, 0)
+
 	for rows.Next() {
 		var s model.Subscription
-		if err := rows.Scan(&s.ID, &s.UserID, &s.RepositoryID, &s.CreatedAt); err != nil {
+		if err := rows.Scan(
+			&s.ID,
+			&s.UserID,
+			&s.RepositoryID,
+			&s.RepositoryName,
+			&s.CreatedAt,
+		); err != nil {
 			log.ErrorContext(ctx, "scan failed", slog.String("error", err.Error()))
 			return nil, fmt.Errorf("%s: scan: %w", op, err)
 		}
@@ -137,9 +150,7 @@ func (r *SubscriptionRepository) GetByUserID(ctx context.Context, id int64) ([]m
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("%s: rows: %w", op, err)
 	}
-	log.DebugContext(ctx, "user subscriptions fetched",
-		slog.Int64("id", id),
-		slog.Int("count", len(subs)))
+
 	return subs, nil
 }
 

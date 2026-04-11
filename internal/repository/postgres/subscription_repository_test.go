@@ -283,25 +283,27 @@ func TestSubscriptionRepository_GetByUserID(t *testing.T) {
 			name:     "success with subscriptions",
 			targetID: userID,
 			mockSetup: func(id int64) {
-				mock.ExpectQuery("SELECT (.+) FROM subscriptions WHERE user_id = \\$1").
+				columns := []string{"id", "user_id", "repository_id", "full_name", "created_at"}
+
+				mock.ExpectQuery("SELECT (.+) FROM subscriptions s JOIN repositories r").
 					WithArgs(id).
-					WillReturnRows(pgxmock.NewRows([]string{"id", "user_id", "repository_id", "created_at"}).
-						AddRow(int64(100), id, int64(1), now).
-						AddRow(int64(101), id, int64(2), now))
+					WillReturnRows(pgxmock.NewRows(columns).
+						AddRow(int64(100), id, int64(1), "google/wire", now).
+						AddRow(int64(101), id, int64(2), "jackc/pgx", now))
 			},
 			expectError: false,
 			expectedSubs: []model.Subscription{
-				{ID: 100, UserID: userID, RepositoryID: 1, CreatedAt: now},
-				{ID: 101, UserID: userID, RepositoryID: 2, CreatedAt: now},
+				{ID: 100, UserID: userID, RepositoryID: 1, RepositoryName: "google/wire", CreatedAt: now},
+				{ID: 101, UserID: userID, RepositoryID: 2, RepositoryName: "jackc/pgx", CreatedAt: now},
 			},
 		},
 		{
 			name:     "success no subscriptions",
 			targetID: userID,
 			mockSetup: func(id int64) {
-				mock.ExpectQuery("SELECT (.+) FROM subscriptions WHERE user_id = \\$1").
+				mock.ExpectQuery("SELECT (.+) FROM subscriptions").
 					WithArgs(id).
-					WillReturnRows(pgxmock.NewRows([]string{"id", "user_id", "repository_id", "created_at"}))
+					WillReturnRows(pgxmock.NewRows([]string{"id", "user_id", "repository_id", "full_name", "created_at"}))
 			},
 			expectError:  false,
 			expectedSubs: []model.Subscription{},
@@ -339,6 +341,7 @@ func TestSubscriptionRepository_GetByUserID(t *testing.T) {
 					assert.Equal(t, expected.ID, result[i].ID)
 					assert.Equal(t, expected.UserID, result[i].UserID)
 					assert.Equal(t, expected.RepositoryID, result[i].RepositoryID)
+					assert.Equal(t, expected.RepositoryName, result[i].RepositoryName)
 					assert.Equal(t, expected.CreatedAt, result[i].CreatedAt)
 				}
 			}

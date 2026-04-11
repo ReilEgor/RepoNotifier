@@ -216,10 +216,11 @@ func (h *Handler) ListSubscriptions(c *gin.Context) {
 	responseSubs := make([]dto.SubscriptionResponse, len(subs))
 	for i, s := range subs {
 		responseSubs[i] = dto.SubscriptionResponse{
-			ID:           s.ID,
-			Email:        email,
-			RepositoryID: s.RepositoryID,
-			CreatedAt:    s.CreatedAt,
+			ID:             s.ID,
+			Email:          email,
+			RepositoryID:   s.RepositoryID,
+			RepositoryName: s.RepositoryName,
+			CreatedAt:      s.CreatedAt,
 		}
 	}
 
