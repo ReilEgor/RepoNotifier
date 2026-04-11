@@ -29,6 +29,9 @@ const (
 	errMsgCreateSub       = "create subscription"
 	errMsgCheckRepoExists = "check repo exists"
 )
+const (
+	maxSendWorkers = 10
+)
 
 type SubscriptionUseCase struct {
 	logger      *slog.Logger
@@ -194,7 +197,7 @@ func (uc *SubscriptionUseCase) ProcessNotifications(ctx context.Context) error {
 		}
 
 		g, sendCtx := errgroup.WithContext(context.Background())
-		g.SetLimit(10)
+		g.SetLimit(maxSendWorkers)
 		for _, email := range emails {
 			g.Go(func() error {
 				if err := uc.emailSender.SendNotification(sendCtx, email, repo.FullName, latestRelease.TagName); err != nil {

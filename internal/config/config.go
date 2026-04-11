@@ -20,7 +20,7 @@ type (
 )
 type Config struct {
 	DSN           DSNType           `env:"DB_SOURCE" envDefault:"postgres://user:password@localhost:5432/userservice?sslmode=disable"`
-	HTTPPort      HTTPPortType      `env:"HTTP_PORT" envDefault:"8080"`
+	HTTPPort      HTTPPortType      `env:"APP_HTTP_PORT" envDefault:"8080"`
 	RedisHost     RedisHostType     `env:"REDIS_HOST" envDefault:"redis"`
 	RedisPort     RedisPortType     `env:"REDIS_PORT" envDefault:"6379"`
 	RedisPassword RedisPasswordType `env:"REDIS_PASSWORD" envDefault:"redis_password"`
@@ -33,5 +33,5 @@ type Config struct {
 
 	ApiKey ApiKeyType `env:"APP_API_KEY" envDefault:"smtp_api_key"`
 
-	GRPCPort GRPCPortType `env:"GRPC_PORT" envDefault:"9090"`
+	GRPCPort GRPCPortType `env:"APP_GRPC_PORT" envDefault:"9090"`
 }

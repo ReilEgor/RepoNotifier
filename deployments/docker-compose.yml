@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init.sh:/docker-entrypoint-initdb.d/init.sh
@@ -42,7 +42,7 @@ services:
     restart: always
     command: redis-server --requirepass ${REDIS_PASSWORD}
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT}:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -66,7 +66,7 @@ services:
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
-      HTTP_PORT: 8080
+      APP_HTTP_PORT: ${APP_HTTP_PORT}
       DB_SOURCE: ${DB_URL}
       EMAIL_HOST: ${EMAIL_HOST}
       EMAIL_PORT: ${EMAIL_PORT}
@@ -74,21 +74,24 @@ services:
       EMAIL_PASSWORD: ${EMAIL_PASSWORD}
       EMAIL_FROM: ${EMAIL_FROM}
       APP_API_KEY: ${APP_API_KEY}
-      GRPC_PORT: ${GRPC_PORT}
+      GRPC_PORT: ${APP_GRPC_PORT}
     ports:
-      - "8080:8080"
-      - "50051:50051"
+      - "${APP_HTTP_PORT}:${APP_HTTP_PORT}"
+      - "${APP_GRPC_PORT}:${APP_GRPC_PORT}"
     depends_on:
       redis:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:${APP_HTTP_PORT}/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
     networks:
       - internal
+      - monitoring
     logging:
       driver: "json-file"
       options:
@@ -102,7 +105,7 @@ services:
     image: prom/prometheus:v2.45.0
     restart: always
     ports:
-      - "9090:9090"
+      - "${PROMETHEUS_PORT}:9090"
     volumes:
       - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheusdata:/prometheus
@@ -132,7 +135,7 @@ services:
     image: grafana/grafana:10.1.0
     restart: always
     ports:
-      - "3030:3000"
+      - "${GRAFANA_PORT}:3000"
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
@@ -153,7 +156,7 @@ services:
     container_name: swagger-ui
     restart: always
     ports:
-      - "9080:8080"
+      - "${SWAGGER_PORT}:8080"
     volumes:
       - ../docs/api/swagger.json:/usr/share/nginx/html/docs/swagger.json:ro
     environment:
