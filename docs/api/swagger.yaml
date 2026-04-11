@@ -72,6 +72,10 @@ definitions:
         description: Reference to the repository ID.
         example: 101
         type: integer
+      repository_name:
+        description: The name of the repository (extracted from FullName).
+        example: golang/go
+        type: string
     type: object
 host: localhost:8080
 info:

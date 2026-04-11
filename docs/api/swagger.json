@@ -279,6 +279,11 @@
                     "description": "Reference to the repository ID.",
                     "type": "integer",
                     "example": 101
+                },
+                "repository_name": {
+                    "description": "The name of the repository (extracted from FullName).",
+                    "type": "string",
+                    "example": "golang/go"
                 }
             }
         }
