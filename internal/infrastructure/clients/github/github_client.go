@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/ReilEgor/RepoNotifier/internal/config"
 	"github.com/ReilEgor/RepoNotifier/internal/domain/model"
 	"github.com/ReilEgor/RepoNotifier/internal/domain/service"
 	"github.com/sony/gobreaker"
@@ -83,9 +84,10 @@ type GitHubClient struct {
 	logger     *slog.Logger
 	cb         *gobreaker.CircuitBreaker
 	apiBase    string
+	token      config.GitHubTokenType
 }
 
-func NewGitHubClient(cache service.Cache) *GitHubClient {
+func NewGitHubClient(cache service.Cache, token config.GitHubTokenType) *GitHubClient {
 	settings := gobreaker.Settings{
 		Name:        cbName,
 		MaxRequests: cbMaxRequests,
@@ -109,6 +111,7 @@ func NewGitHubClient(cache service.Cache) *GitHubClient {
 		logger:     slog.With(slog.String("component", componentGithubClient)),
 		cb:         gobreaker.NewCircuitBreaker(settings),
 		apiBase:    githubAPIBase,
+		token:      token,
 	}
 }
 
@@ -135,7 +138,7 @@ func (c *GitHubClient) RepoExists(ctx context.Context, fullName string) (bool, e
 		if err != nil {
 			return false, fmt.Errorf("create request: %w", err)
 		}
-		setDefaultHeaders(req)
+		c.setDefaultHeaders(req)
 
 		resp, err := c.httpClient.Do(req)
 		if err != nil {
@@ -209,7 +212,7 @@ func (c *GitHubClient) GetLatestRelease(ctx context.Context, fullName string) (*
 		if err != nil {
 			return nil, fmt.Errorf("create request: %w", err)
 		}
-		setDefaultHeaders(req)
+		c.setDefaultHeaders(req)
 		log.DebugContext(ctx, "sending request", slog.String("method", http.MethodGet), slog.String("url", url))
 		resp, err := c.httpClient.Do(req)
 		if err != nil {
@@ -259,8 +262,12 @@ func (c *GitHubClient) GetLatestRelease(ctx context.Context, fullName string) (*
 	return info, nil
 }
 
-func setDefaultHeaders(req *http.Request) {
+func (c *GitHubClient) setDefaultHeaders(req *http.Request) {
 	req.Header.Set("Accept", "application/vnd.github+json")
 	req.Header.Set("X-GitHub-Api-Version", githubAPIVersion)
 	req.Header.Set("User-Agent", userAgent)
+
+	if c.token != "" {
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.token))
+	}
 }

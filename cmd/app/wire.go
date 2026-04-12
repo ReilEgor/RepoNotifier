@@ -83,6 +83,7 @@ func InitializeApp(
 	emailFrom config.EmailFromType,
 	emailUser config.EmailUserType,
 	apiKey config.ApiKeyType,
+	githubToken config.GitHubTokenType,
 ) (*App, func(), error) {
 	wire.Build(
 		ServicesSet,
