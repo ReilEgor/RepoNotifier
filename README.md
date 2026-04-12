@@ -135,19 +135,21 @@ All protected endpoints require the `X-API-Key` header. Public endpoints (Swagge
 ### Subscribe to a repository
  
 ```bash
-curl -X POST http://localhost:8080/api/v1/subscriptions \
-  -H 'X-API-Key: your-secret-key' \
+curl -X 'POST' \
+  'http://localhost:8080/api/v1/subscribe' \
+  -H 'accept: application/json' \
+  -H 'X-API-Key: my-super-secret-token-123' \
   -H 'Content-Type: application/json' \
   -d '{
-    "email": "user@example.com",
-    "repository": "google/wire"
-  }'
+  "email": "test@gmail.com",
+  "repository": "ReilEgor/NotifierTest"
+}'
 ```
  
 **Success response** `201 Created`:
 ```json
 {
-  "id": 89
+  "message": "Subscription initiated. Please check your email to confirm."
 }
 ```
  
@@ -156,63 +158,15 @@ curl -X POST http://localhost:8080/api/v1/subscriptions \
 ### Unsubscribe from a repository
  
 ```bash
-curl -X DELETE http://localhost:8080/api/v1/subscriptions \
-  -H 'X-API-Key: your-secret-key' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "email": "user@example.com",
-    "repository": "google/wire"
-  }'
+curl -X 'GET' \
+  'http://localhost:8080/api/v1/unsubscribe/123' \
+  -H 'accept: application/json'
 ```
  
 **Success response** `200 OK`:
 ```json
 {
-  "message": "Subscription deleted successfully"
-}
-```
-## gRPC API
-
-### Subscribe to a repository
-
-- **Endpoint:** `localhost:50051`
-- **RPC Method:** `subscription.v1.SubscriptionService/Subscribe`
-- **Metadata:** `x-api-key: <your_secret_key>`
-
-**Request Body:**
-```json
-{
-  "email": "test@example.com",
-  "repository": "google/wire"
-}
-```
-
-**Response (Status: 0 OK):**
-```json
-{
-    "message": "Successfully subscribed 90",
-    "success": true
-}
-```
-
-### Unsubscribe from a repository
-
-- **RPC Method:** `subscription.v1.SubscriptionService/Unsubscribe`
-- **Metadata:** `x-api-key: <your_secret_key>`
-
-**Request Body:**
-```json
-{
-  "email": "test@example.com",
-  "repository": "google/wire"
-}
-```
-
-**Response (Status: 0 OK):**
-```json
-{
-    "message": "Successfully unsubscribed",
-    "success": true
+  "error": "invalid or expired unsubscribe link"
 }
 ```
 
