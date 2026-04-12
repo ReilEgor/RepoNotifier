@@ -124,7 +124,7 @@ func TestGitHubClient_RepoExists(t *testing.T) {
 			cacheMock := mocks.NewCache(t)
 			tt.mockCache(cacheMock)
 
-			client := NewGitHubClient(cacheMock)
+			client := NewGitHubClient(cacheMock, "")
 			client.apiBase = server.URL
 
 			result, err := client.RepoExists(context.Background(), tt.repoName)
@@ -289,7 +289,7 @@ func TestGitHubClient_GetLatestRelease(t *testing.T) {
 			cacheMock := mocks.NewCache(t)
 			tt.mockCache(cacheMock)
 
-			client := NewGitHubClient(cacheMock)
+			client := NewGitHubClient(cacheMock, "")
 			client.apiBase = server.URL
 
 			result, err := client.GetLatestRelease(context.Background(), tt.repoName)
@@ -322,7 +322,7 @@ func TestGitHubClient_CircuitBreaker_Recovery(t *testing.T) {
 	cacheMock.On("Get", mock.Anything, mock.Anything).Return("", service.ErrCacheMiss)
 	cacheMock.On("Set", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
 
-	client := NewGitHubClient(cacheMock)
+	client := NewGitHubClient(cacheMock, "")
 	client.apiBase = server.URL
 
 	ctx := context.Background()
