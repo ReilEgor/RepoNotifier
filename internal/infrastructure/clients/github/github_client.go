@@ -20,7 +20,7 @@ const (
 	httpClientTimeout = 10 * time.Second
 
 	// Cache TTL
-	cacheTTL = 1 * time.Minute
+	cacheTTL = 10 * time.Minute
 
 	// Cache key prefixes
 	cacheKeyRepoExists    = "repo_exists:"
