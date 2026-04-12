@@ -14,6 +14,24 @@ type SubscriptionRepository struct {
 	mock.Mock
 }
 
+// Confirm provides a mock function with given fields: ctx, token
+func (_m *SubscriptionRepository) Confirm(ctx context.Context, token string) error {
+	ret := _m.Called(ctx, token)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Confirm")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, token)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Create provides a mock function with given fields: ctx, sub
 func (_m *SubscriptionRepository) Create(ctx context.Context, sub *model.Subscription) (int64, error) {
 	ret := _m.Called(ctx, sub)
@@ -35,6 +53,34 @@ func (_m *SubscriptionRepository) Create(ctx context.Context, sub *model.Subscri
 
 	if rf, ok := ret.Get(1).(func(context.Context, *model.Subscription) error); ok {
 		r1 = rf(ctx, sub)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreatePending provides a mock function with given fields: ctx, userID, repoID, token
+func (_m *SubscriptionRepository) CreatePending(ctx context.Context, userID int64, repoID int64, token string) (int64, error) {
+	ret := _m.Called(ctx, userID, repoID, token)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreatePending")
+	}
+
+	var r0 int64
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64, int64, string) (int64, error)); ok {
+		return rf(ctx, userID, repoID, token)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, int64, int64, string) int64); ok {
+		r0 = rf(ctx, userID, repoID, token)
+	} else {
+		r0 = ret.Get(0).(int64)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, int64, int64, string) error); ok {
+		r1 = rf(ctx, userID, repoID, token)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -83,6 +129,36 @@ func (_m *SubscriptionRepository) GetAll(ctx context.Context) ([]model.Subscript
 
 	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
 		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetByEmail provides a mock function with given fields: ctx, email
+func (_m *SubscriptionRepository) GetByEmail(ctx context.Context, email string) ([]model.Subscription, error) {
+	ret := _m.Called(ctx, email)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetByEmail")
+	}
+
+	var r0 []model.Subscription
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) ([]model.Subscription, error)); ok {
+		return rf(ctx, email)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) []model.Subscription); ok {
+		r0 = rf(ctx, email)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]model.Subscription)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, email)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -178,6 +254,54 @@ func (_m *SubscriptionRepository) GetEmailsByRepoID(ctx context.Context, repoID 
 	}
 
 	return r0, r1
+}
+
+// GetSubscribersByRepoID provides a mock function with given fields: ctx, id
+func (_m *SubscriptionRepository) GetSubscribersByRepoID(ctx context.Context, id int64) ([]model.Subscriber, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetSubscribersByRepoID")
+	}
+
+	var r0 []model.Subscriber
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64) ([]model.Subscriber, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, int64) []model.Subscriber); ok {
+		r0 = rf(ctx, id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]model.Subscriber)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, int64) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UnsubscribeByToken provides a mock function with given fields: ctx, token
+func (_m *SubscriptionRepository) UnsubscribeByToken(ctx context.Context, token string) error {
+	ret := _m.Called(ctx, token)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UnsubscribeByToken")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, token)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // NewSubscriptionRepository creates a new instance of SubscriptionRepository. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.

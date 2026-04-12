@@ -16,24 +16,10 @@ definitions:
     type: object
   github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.CreateSubscriptionResponse:
     properties:
-      id:
-        description: The ID of the subscription in the database.
-        example: 1
-        type: integer
-    type: object
-  github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.DeleteSubscriptionRequest:
-    properties:
-      email:
-        description: Email address associated with the subscription.
-        example: user@example.com
+      message:
+        description: Status message indicating the result of the subscription creation.
+        example: Confirmation email sent
         type: string
-      repository:
-        description: Repository name to unsubscribe from.
-        example: golang/go
-        type: string
-    required:
-    - email
-    - repository
     type: object
   github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.DeleteSubscriptionResponse:
     properties:
@@ -56,6 +42,10 @@ definitions:
     type: object
   github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.SubscriptionResponse:
     properties:
+      confirmed:
+        description: Indicates whether the subscription has been confirmed by the
+          user.
+        type: boolean
       created_at:
         description: Timestamp when the subscription was created.
         example: "2026-04-08T18:00:00Z"
@@ -68,10 +58,10 @@ definitions:
         description: Unique identifier of the subscription.
         example: 1
         type: integer
-      repository_id:
-        description: Reference to the repository ID.
-        example: 101
-        type: integer
+      last_seen_tag:
+        description: The latest tag seen for this subscription, useful for tracking
+          updates.
+        type: string
       repository_name:
         description: The name of the repository (extracted from FullName).
         example: golang/go
@@ -84,27 +74,26 @@ info:
   title: RepoNotifier API
   version: "1.0    \t      1.0"
 paths:
-  /subscriptions:
-    delete:
-      consumes:
-      - application/json
-      description: Remove a subscription for a specific user and repository.
+  /confirm/{token}:
+    get:
+      description: Confirm a pending subscription using the token sent via email.
       parameters:
-      - description: Unsubscribe details
-        in: body
-        name: request
+      - description: Confirmation token
+        in: path
+        name: token
         required: true
-        schema:
-          $ref: '#/definitions/github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.DeleteSubscriptionRequest'
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: 'message: subscription confirmed successfully'
           schema:
-            $ref: '#/definitions/github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.DeleteSubscriptionResponse'
-        "400":
-          description: Invalid request body
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Invalid or expired token
           schema:
             additionalProperties:
               type: string
@@ -115,14 +104,40 @@ paths:
             additionalProperties:
               type: string
             type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Unsubscribe from a repository
+      summary: Confirm email subscription
       tags:
       - subscriptions
+  /subscribe:
+    post:
+      consumes:
+      - application/json
+      description: Create a pending subscription and send a confirmation email.
+      parameters:
+      - description: Subscription details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.CreateSubscriptionRequest'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.CreateSubscriptionResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Subscribe to a repository
+      tags:
+      - subscriptions
+  /subscriptions:
     get:
-      description: Get a list of all repositories the user is currently subscribed
-        to.
+      description: Retrieve a list of all confirmed subscriptions for a given email.
       parameters:
       - description: User email address
         in: query
@@ -137,7 +152,7 @@ paths:
           schema:
             $ref: '#/definitions/github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.ListSubscriptionsResponse'
         "400":
-          description: Email is required
+          description: Email is required or invalid
           schema:
             additionalProperties:
               type: string
@@ -150,36 +165,27 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: List user subscriptions
+      summary: Get all active subscriptions
       tags:
       - subscriptions
-    post:
-      consumes:
-      - application/json
-      description: Create a subscription for a user to track the latest releases of
-        a GitHub repository.
+  /unsubscribe/{token}:
+    get:
+      description: Remove a subscription using a unique token.
       parameters:
-      - description: Subscription details
-        in: body
-        name: request
+      - description: Unsubscribe token
+        in: path
+        name: token
         required: true
-        schema:
-          $ref: '#/definitions/github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.CreateSubscriptionRequest'
+        type: string
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
+        "200":
+          description: OK
           schema:
-            $ref: '#/definitions/github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.CreateSubscriptionResponse'
-        "400":
-          description: Invalid request body
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.DeleteSubscriptionResponse'
         "404":
-          description: Repository not found on GitHub
+          description: Invalid token or subscription not found
           schema:
             additionalProperties:
               type: string
@@ -190,9 +196,7 @@ paths:
             additionalProperties:
               type: string
             type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Subscribe to a repository
+      summary: Unsubscribe from notifications
       tags:
       - subscriptions
 securityDefinitions:

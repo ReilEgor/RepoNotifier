@@ -6,8 +6,9 @@ import "time"
 type SubscriptionResponse struct {
 	ID             int64     `json:"id" example:"1"`                            // Unique identifier of the subscription.
 	Email          string    `json:"email" example:"user@example.com"`          // Subscriber's email address.
-	RepositoryID   int64     `json:"repository_id" example:"101"`               // Reference to the repository ID.
 	RepositoryName string    `json:"repository_name" example:"golang/go"`       // The name of the repository (extracted from FullName).
+	Confirmed      bool      `json:"confirmed"`                                 // Indicates whether the subscription has been confirmed by the user.
+	LastSeenTag    string    `json:"last_seen_tag"`                             // The latest tag seen for this subscription, useful for tracking updates.
 	CreatedAt      time.Time `json:"created_at" example:"2026-04-08T18:00:00Z"` // Timestamp when the subscription was created.
 }
 
@@ -18,7 +19,7 @@ type CreateSubscriptionRequest struct {
 }
 
 type CreateSubscriptionResponse struct {
-	ID int64 `json:"id" example:"1"` // The ID of the subscription in the database.
+	Message string `json:"message" example:"Confirmation email sent"` // Status message indicating the result of the subscription creation.
 }
 
 // DeleteSubscriptionRequest defines the params for removing an existing subscription.

@@ -13,17 +13,35 @@ type EmailSender struct {
 	mock.Mock
 }
 
-// SendNotification provides a mock function with given fields: ctx, to, subject, body
-func (_m *EmailSender) SendNotification(ctx context.Context, to string, subject string, body string) error {
-	ret := _m.Called(ctx, to, subject, body)
+// SendConfirmation provides a mock function with given fields: ctx, to, repoName, token
+func (_m *EmailSender) SendConfirmation(ctx context.Context, to string, repoName string, token string) error {
+	ret := _m.Called(ctx, to, repoName, token)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SendConfirmation")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) error); ok {
+		r0 = rf(ctx, to, repoName, token)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SendNotification provides a mock function with given fields: ctx, to, repoName, tagName, token
+func (_m *EmailSender) SendNotification(ctx context.Context, to string, repoName string, tagName string, token string) error {
+	ret := _m.Called(ctx, to, repoName, tagName, token)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SendNotification")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) error); ok {
-		r0 = rf(ctx, to, subject, body)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, string) error); ok {
+		r0 = rf(ctx, to, repoName, tagName, token)
 	} else {
 		r0 = ret.Error(0)
 	}

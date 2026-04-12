@@ -15,14 +15,24 @@ const (
 	componentEmailClient = "EmailClient"
 
 	emailSubjectTemplate = "New release in %s!"
-	emailBodyTemplate    = "Hello!\n\nA new version %s has been released for the repository %s.\n" +
-		"Check it out here: https://github.com/%s/releases/tag/%s\n\nBest regards,\nRepoNotifier"
+	emailBodyTemplate    = "Hello!\n\nA new version %s has been released for %s.\n" +
+		"Check it out here: https://github.com/%s/releases/tag/%s\n\n" +
+		"---\n" +
+		"Unsubscribe: %s/api/v1/unsubscribe/%s\n\n" +
+		"Best regards,\nRepoNotifier"
+
 	emailMsgTemplate = "From: %s\r\n" +
 		"To: %s\r\n" +
 		"Subject: %s\r\n" +
 		"Content-Type: text/plain; charset=UTF-8\r\n" +
 		"\r\n" +
 		"%s\r\n"
+
+	confirmSubjectTemplate = "Confirm your subscription to %s"
+	confirmBodyTemplate    = "Hello!\n\nTo start receiving notifications for %s, " +
+		"please confirm your subscription:\n\n" +
+		"%s/api/v1/confirm/%s\n\n" +
+		"Best regards,\nRepoNotifier"
 )
 
 const (
@@ -30,9 +40,15 @@ const (
 	errMsgBuildMsg = "failed to build message"
 )
 
-func (c *SmtpClient) buildMessage(to, repoName, tagName string) []byte {
+func (c *SmtpClient) buildMessage(to, repoName, tagName, token string) []byte {
 	subject := fmt.Sprintf(emailSubjectTemplate, repoName)
-	body := fmt.Sprintf(emailBodyTemplate, tagName, repoName, repoName, tagName)
+	body := fmt.Sprintf(emailBodyTemplate, tagName, repoName, repoName, tagName, c.baseURL, token)
+	return []byte(fmt.Sprintf(emailMsgTemplate, c.from, to, subject, body))
+}
+
+func (c *SmtpClient) buildConfirmMessage(to, repoName, token string) []byte {
+	subject := fmt.Sprintf(confirmSubjectTemplate, repoName)
+	body := fmt.Sprintf(confirmBodyTemplate, repoName, c.baseURL, token)
 	return []byte(fmt.Sprintf(emailMsgTemplate, c.from, to, subject, body))
 }
 
@@ -43,6 +59,7 @@ type SmtpClient struct {
 	auth     smtp.Auth
 	sendMail func(addr string, a smtp.Auth, from string, to []string, msg []byte) error
 	logger   *slog.Logger
+	baseURL  config.AppBaseURLType
 }
 
 func NewSmtpClient(
@@ -51,6 +68,7 @@ func NewSmtpClient(
 	from config.EmailFromType,
 	password config.EmailPasswordType,
 	user config.EmailUserType,
+	baseURL config.AppBaseURLType,
 ) *SmtpClient {
 	return &SmtpClient{
 		host:     host,
@@ -59,33 +77,50 @@ func NewSmtpClient(
 		auth:     smtp.PlainAuth("", string(user), string(password), string(host)),
 		logger:   slog.With(slog.String("component", componentEmailClient)),
 		sendMail: smtp.SendMail,
+		baseURL:  baseURL,
 	}
 }
+func classifySmtpError(err error) error {
+	msg := strings.ToLower(err.Error())
+	if strings.Contains(msg, "535") || strings.Contains(msg, "authentication failed") {
+		return service.ErrAuthFailed
+	}
+	return service.ErrSMTPUnavailable
+}
 
-func (c *SmtpClient) SendNotification(ctx context.Context, to string, repoName string, tagName string) error {
-	const op = "SmtpClient.SendNotification"
-	log := c.logger.With(slog.String("op", op))
-
-	msg := c.buildMessage(to, repoName, tagName)
+func (c *SmtpClient) sendEmail(ctx context.Context, op, to string, msg []byte) error {
 	addr := fmt.Sprintf("%s:%s", c.host, c.port)
 	if err := c.sendMail(addr, c.auth, string(c.from), []string{to}, msg); err != nil {
-		if strings.Contains(err.Error(), "535") || strings.Contains(err.Error(), "Authentication failed") {
-			log.ErrorContext(ctx, "smtp auth failed", slog.String("error", err.Error()))
-			return fmt.Errorf("%s: %w", op, service.ErrAuthFailed)
-		}
-		log.ErrorContext(ctx, errMsgSendMail,
+		c.logger.ErrorContext(ctx, errMsgSendMail,
+			slog.String("op", op),
 			slog.String("to", to),
-			slog.String("repo", repoName),
-			slog.String("tag", tagName),
 			slog.String("error", err.Error()),
 		)
-		return fmt.Errorf("%s: %w", op, service.ErrSMTPUnavailable)
+		return fmt.Errorf("%s: %w", op, classifySmtpError(err))
 	}
+	return nil
+}
 
-	log.InfoContext(ctx, "email sent successfully",
+func (c *SmtpClient) SendNotification(ctx context.Context, to, repoName, tagName, token string) error {
+	const op = "SmtpClient.SendNotification"
+	msg := c.buildMessage(to, repoName, tagName, token)
+	if err := c.sendEmail(ctx, op, to, msg); err != nil {
+		return err
+	}
+	c.logger.InfoContext(ctx, "notification email sent",
 		slog.String("to", to),
 		slog.String("repo", repoName),
 		slog.String("tag", tagName),
 	)
+	return nil
+}
+
+func (c *SmtpClient) SendConfirmation(ctx context.Context, to, repoName, token string) error {
+	const op = "SmtpClient.SendConfirmation"
+	msg := c.buildConfirmMessage(to, repoName, token)
+	if err := c.sendEmail(ctx, op, to, msg); err != nil {
+		return err
+	}
+	c.logger.InfoContext(ctx, "confirmation email sent", slog.String("to", to))
 	return nil
 }

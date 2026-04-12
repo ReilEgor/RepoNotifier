@@ -26,8 +26,6 @@ import (
 
 var UseCaseSet = wire.NewSet(
 	usecaseRealization.NewSubscriptionUseCase,
-	usecaseRealization.NewUserUseCase,
-	wire.Bind(new(usecaseInterface.UserUseCase), new(*usecaseRealization.UserUseCase)),
 	wire.Bind(new(usecaseInterface.SubscriptionUseCase), new(*usecaseRealization.SubscriptionUseCase)),
 )
 
@@ -84,6 +82,7 @@ func InitializeApp(
 	emailUser config.EmailUserType,
 	apiKey config.ApiKeyType,
 	githubToken config.GitHubTokenType,
+	baseURL config.AppBaseURLType,
 ) (*App, func(), error) {
 	wire.Build(
 		ServicesSet,

@@ -14,34 +14,6 @@ type UserRepository struct {
 	mock.Mock
 }
 
-// Create provides a mock function with given fields: ctx, email
-func (_m *UserRepository) Create(ctx context.Context, email string) (int64, error) {
-	ret := _m.Called(ctx, email)
-
-	if len(ret) == 0 {
-		panic("no return value specified for Create")
-	}
-
-	var r0 int64
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (int64, error)); ok {
-		return rf(ctx, email)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) int64); ok {
-		r0 = rf(ctx, email)
-	} else {
-		r0 = ret.Get(0).(int64)
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, email)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // GetByEmail provides a mock function with given fields: ctx, email
 func (_m *UserRepository) GetByEmail(ctx context.Context, email string) (model.User, error) {
 	ret := _m.Called(ctx, email)

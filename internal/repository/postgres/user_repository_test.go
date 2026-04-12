@@ -104,68 +104,6 @@ func TestUserRepository_GetByEmail(t *testing.T) {
 	}
 }
 
-func TestUserRepository_Create(t *testing.T) {
-	mock, err := pgxmock.NewPool()
-	assert.NoError(t, err)
-	defer mock.Close()
-
-	discardLogger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	repo := &UserRepository{
-		db:     mock,
-		logger: discardLogger,
-	}
-
-	userEmail := "new-user@example.com"
-
-	tests := []struct {
-		name        string
-		email       string
-		mockSetup   func(email string)
-		expectError bool
-		expectedID  int64
-	}{
-		{
-			name:  "success create",
-			email: userEmail,
-			mockSetup: func(email string) {
-				mock.ExpectQuery("INSERT INTO users").
-					WithArgs(email).
-					WillReturnRows(pgxmock.NewRows([]string{"id"}).AddRow(int64(1)))
-			},
-			expectError: false,
-			expectedID:  1,
-		},
-		{
-			name:  "database error",
-			email: userEmail,
-			mockSetup: func(email string) {
-				mock.ExpectQuery("INSERT INTO users").
-					WithArgs(email).
-					WillReturnError(fmt.Errorf("unique constraint violation"))
-			},
-			expectError: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.mockSetup(tt.email)
-
-			id, err := repo.Create(context.Background(), tt.email)
-
-			if tt.expectError {
-				assert.Error(t, err)
-				assert.Equal(t, int64(0), id)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.expectedID, id)
-			}
-
-			assert.NoError(t, mock.ExpectationsWereMet())
-		})
-	}
-}
-
 func TestUserRepository_GetOrCreate(t *testing.T) {
 	mock, err := pgxmock.NewPool()
 	assert.NoError(t, err)

@@ -18,13 +18,11 @@ import (
 type GinServer struct {
 	router         *gin.Engine
 	subscriptionUC usecase.SubscriptionUseCase
-	userUC         usecase.UserUseCase
 	logger         *slog.Logger
 }
 
 func NewGinServer(
 	subscriptionUC usecase.SubscriptionUseCase,
-	userUC usecase.UserUseCase,
 	redisClient *redis.Client,
 	apiKey config.ApiKeyType,
 ) *GinServer {
@@ -35,11 +33,10 @@ func NewGinServer(
 	s := &GinServer{
 		router:         router,
 		subscriptionUC: subscriptionUC,
-		userUC:         userUC,
 		logger:         logger,
 	}
 
-	h := handler.NewHandler(subscriptionUC, userUC, string(apiKey))
+	h := handler.NewHandler(subscriptionUC, string(apiKey))
 	h.InitRoutes(s.router)
 
 	return s

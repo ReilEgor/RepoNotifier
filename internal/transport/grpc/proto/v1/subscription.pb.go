@@ -9,6 +9,7 @@ package v1
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -127,8 +128,7 @@ func (x *SubscribeResponse) GetSuccess() bool {
 
 type UnsubscribeRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
-	Repository    string                 `protobuf:"bytes,2,opt,name=repository,proto3" json:"repository,omitempty"`
+	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -163,16 +163,9 @@ func (*UnsubscribeRequest) Descriptor() ([]byte, []int) {
 	return file_subscription_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *UnsubscribeRequest) GetEmail() string {
+func (x *UnsubscribeRequest) GetToken() string {
 	if x != nil {
-		return x.Email
-	}
-	return ""
-}
-
-func (x *UnsubscribeRequest) GetRepository() string {
-	if x != nil {
-		return x.Repository
+		return x.Token
 	}
 	return ""
 }
@@ -229,11 +222,183 @@ func (x *UnsubscribeResponse) GetSuccess() bool {
 	return false
 }
 
+type ListSubscriptionsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListSubscriptionsRequest) Reset() {
+	*x = ListSubscriptionsRequest{}
+	mi := &file_subscription_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListSubscriptionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListSubscriptionsRequest) ProtoMessage() {}
+
+func (x *ListSubscriptionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_subscription_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListSubscriptionsRequest.ProtoReflect.Descriptor instead.
+func (*ListSubscriptionsRequest) Descriptor() ([]byte, []int) {
+	return file_subscription_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ListSubscriptionsRequest) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+type Subscription struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Repo          string                 `protobuf:"bytes,2,opt,name=repo,proto3" json:"repo,omitempty"`
+	Confirmed     bool                   `protobuf:"varint,3,opt,name=confirmed,proto3" json:"confirmed,omitempty"`
+	LastSeenTag   string                 `protobuf:"bytes,4,opt,name=last_seen_tag,json=lastSeenTag,proto3" json:"last_seen_tag,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Subscription) Reset() {
+	*x = Subscription{}
+	mi := &file_subscription_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Subscription) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Subscription) ProtoMessage() {}
+
+func (x *Subscription) ProtoReflect() protoreflect.Message {
+	mi := &file_subscription_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Subscription.ProtoReflect.Descriptor instead.
+func (*Subscription) Descriptor() ([]byte, []int) {
+	return file_subscription_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *Subscription) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *Subscription) GetRepo() string {
+	if x != nil {
+		return x.Repo
+	}
+	return ""
+}
+
+func (x *Subscription) GetConfirmed() bool {
+	if x != nil {
+		return x.Confirmed
+	}
+	return false
+}
+
+func (x *Subscription) GetLastSeenTag() string {
+	if x != nil {
+		return x.LastSeenTag
+	}
+	return ""
+}
+
+func (x *Subscription) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+type ListSubscriptionsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Subscriptions []*Subscription        `protobuf:"bytes,1,rep,name=subscriptions,proto3" json:"subscriptions,omitempty"`
+	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListSubscriptionsResponse) Reset() {
+	*x = ListSubscriptionsResponse{}
+	mi := &file_subscription_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListSubscriptionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListSubscriptionsResponse) ProtoMessage() {}
+
+func (x *ListSubscriptionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_subscription_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListSubscriptionsResponse.ProtoReflect.Descriptor instead.
+func (*ListSubscriptionsResponse) Descriptor() ([]byte, []int) {
+	return file_subscription_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ListSubscriptionsResponse) GetSubscriptions() []*Subscription {
+	if x != nil {
+		return x.Subscriptions
+	}
+	return nil
+}
+
+func (x *ListSubscriptionsResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
 var File_subscription_proto protoreflect.FileDescriptor
 
 const file_subscription_proto_rawDesc = "" +
 	"\n" +
-	"\x12subscription.proto\x12\x0fsubscription.v1\"H\n" +
+	"\x12subscription.proto\x12\x0fsubscription.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"H\n" +
 	"\x10SubscribeRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1e\n" +
 	"\n" +
@@ -241,18 +406,28 @@ const file_subscription_proto_rawDesc = "" +
 	"repository\"G\n" +
 	"\x11SubscribeResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12\x18\n" +
-	"\asuccess\x18\x02 \x01(\bR\asuccess\"J\n" +
+	"\asuccess\x18\x02 \x01(\bR\asuccess\"*\n" +
 	"\x12UnsubscribeRequest\x12\x14\n" +
-	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1e\n" +
-	"\n" +
-	"repository\x18\x02 \x01(\tR\n" +
-	"repository\"I\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token\"I\n" +
 	"\x13UnsubscribeResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12\x18\n" +
-	"\asuccess\x18\x02 \x01(\bR\asuccess2\xc3\x01\n" +
+	"\asuccess\x18\x02 \x01(\bR\asuccess\"0\n" +
+	"\x18ListSubscriptionsRequest\x12\x14\n" +
+	"\x05email\x18\x01 \x01(\tR\x05email\"\xaf\x01\n" +
+	"\fSubscription\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	"\x04repo\x18\x02 \x01(\tR\x04repo\x12\x1c\n" +
+	"\tconfirmed\x18\x03 \x01(\bR\tconfirmed\x12\"\n" +
+	"\rlast_seen_tag\x18\x04 \x01(\tR\vlastSeenTag\x129\n" +
+	"\n" +
+	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"v\n" +
+	"\x19ListSubscriptionsResponse\x12C\n" +
+	"\rsubscriptions\x18\x01 \x03(\v2\x1d.subscription.v1.SubscriptionR\rsubscriptions\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total2\xaf\x02\n" +
 	"\x13SubscriptionService\x12R\n" +
 	"\tSubscribe\x12!.subscription.v1.SubscribeRequest\x1a\".subscription.v1.SubscribeResponse\x12X\n" +
-	"\vUnsubscribe\x12#.subscription.v1.UnsubscribeRequest\x1a$.subscription.v1.UnsubscribeResponseBCZAgithub.com/ReilEgor/RepoNotifier/internal/transport/grpc/proto/v1b\x06proto3"
+	"\vUnsubscribe\x12#.subscription.v1.UnsubscribeRequest\x1a$.subscription.v1.UnsubscribeResponse\x12j\n" +
+	"\x11ListSubscriptions\x12).subscription.v1.ListSubscriptionsRequest\x1a*.subscription.v1.ListSubscriptionsResponseBCZAgithub.com/ReilEgor/RepoNotifier/internal/transport/grpc/proto/v1b\x06proto3"
 
 var (
 	file_subscription_proto_rawDescOnce sync.Once
@@ -266,23 +441,31 @@ func file_subscription_proto_rawDescGZIP() []byte {
 	return file_subscription_proto_rawDescData
 }
 
-var file_subscription_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_subscription_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_subscription_proto_goTypes = []any{
-	(*SubscribeRequest)(nil),    // 0: subscription.v1.SubscribeRequest
-	(*SubscribeResponse)(nil),   // 1: subscription.v1.SubscribeResponse
-	(*UnsubscribeRequest)(nil),  // 2: subscription.v1.UnsubscribeRequest
-	(*UnsubscribeResponse)(nil), // 3: subscription.v1.UnsubscribeResponse
+	(*SubscribeRequest)(nil),          // 0: subscription.v1.SubscribeRequest
+	(*SubscribeResponse)(nil),         // 1: subscription.v1.SubscribeResponse
+	(*UnsubscribeRequest)(nil),        // 2: subscription.v1.UnsubscribeRequest
+	(*UnsubscribeResponse)(nil),       // 3: subscription.v1.UnsubscribeResponse
+	(*ListSubscriptionsRequest)(nil),  // 4: subscription.v1.ListSubscriptionsRequest
+	(*Subscription)(nil),              // 5: subscription.v1.Subscription
+	(*ListSubscriptionsResponse)(nil), // 6: subscription.v1.ListSubscriptionsResponse
+	(*timestamppb.Timestamp)(nil),     // 7: google.protobuf.Timestamp
 }
 var file_subscription_proto_depIdxs = []int32{
-	0, // 0: subscription.v1.SubscriptionService.Subscribe:input_type -> subscription.v1.SubscribeRequest
-	2, // 1: subscription.v1.SubscriptionService.Unsubscribe:input_type -> subscription.v1.UnsubscribeRequest
-	1, // 2: subscription.v1.SubscriptionService.Subscribe:output_type -> subscription.v1.SubscribeResponse
-	3, // 3: subscription.v1.SubscriptionService.Unsubscribe:output_type -> subscription.v1.UnsubscribeResponse
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	7, // 0: subscription.v1.Subscription.created_at:type_name -> google.protobuf.Timestamp
+	5, // 1: subscription.v1.ListSubscriptionsResponse.subscriptions:type_name -> subscription.v1.Subscription
+	0, // 2: subscription.v1.SubscriptionService.Subscribe:input_type -> subscription.v1.SubscribeRequest
+	2, // 3: subscription.v1.SubscriptionService.Unsubscribe:input_type -> subscription.v1.UnsubscribeRequest
+	4, // 4: subscription.v1.SubscriptionService.ListSubscriptions:input_type -> subscription.v1.ListSubscriptionsRequest
+	1, // 5: subscription.v1.SubscriptionService.Subscribe:output_type -> subscription.v1.SubscribeResponse
+	3, // 6: subscription.v1.SubscriptionService.Unsubscribe:output_type -> subscription.v1.UnsubscribeResponse
+	6, // 7: subscription.v1.SubscriptionService.ListSubscriptions:output_type -> subscription.v1.ListSubscriptionsResponse
+	5, // [5:8] is the sub-list for method output_type
+	2, // [2:5] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_subscription_proto_init() }
@@ -296,7 +479,7 @@ func file_subscription_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_subscription_proto_rawDesc), len(file_subscription_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -14,6 +14,24 @@ type SubscriptionUseCase struct {
 	mock.Mock
 }
 
+// Confirm provides a mock function with given fields: ctx, token
+func (_m *SubscriptionUseCase) Confirm(ctx context.Context, token string) error {
+	ret := _m.Called(ctx, token)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Confirm")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, token)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // ListByEmail provides a mock function with given fields: ctx, email
 func (_m *SubscriptionUseCase) ListByEmail(ctx context.Context, email string) ([]model.Subscription, error) {
 	ret := _m.Called(ctx, email)
@@ -63,31 +81,21 @@ func (_m *SubscriptionUseCase) ProcessNotifications(ctx context.Context) error {
 }
 
 // Subscribe provides a mock function with given fields: ctx, email, repoName
-func (_m *SubscriptionUseCase) Subscribe(ctx context.Context, email string, repoName string) (int64, error) {
+func (_m *SubscriptionUseCase) Subscribe(ctx context.Context, email string, repoName string) error {
 	ret := _m.Called(ctx, email, repoName)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Subscribe")
 	}
 
-	var r0 int64
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) (int64, error)); ok {
-		return rf(ctx, email, repoName)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) int64); ok {
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
 		r0 = rf(ctx, email, repoName)
 	} else {
-		r0 = ret.Get(0).(int64)
+		r0 = ret.Error(0)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
-		r1 = rf(ctx, email, repoName)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
+	return r0
 }
 
 // Unsubscribe provides a mock function with given fields: ctx, email, repoName
@@ -101,6 +109,24 @@ func (_m *SubscriptionUseCase) Unsubscribe(ctx context.Context, email string, re
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
 		r0 = rf(ctx, email, repoName)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// UnsubscribeByToken provides a mock function with given fields: ctx, token
+func (_m *SubscriptionUseCase) UnsubscribeByToken(ctx context.Context, token string) error {
+	ret := _m.Called(ctx, token)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UnsubscribeByToken")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, token)
 	} else {
 		r0 = ret.Error(0)
 	}

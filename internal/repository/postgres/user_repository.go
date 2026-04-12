@@ -52,28 +52,6 @@ func (r *UserRepository) GetByEmail(ctx context.Context, email string) (model.Us
 	return user, nil
 }
 
-const createUserRepositoryQuery = `INSERT INTO users (email) VALUES ($1) RETURNING id`
-
-func (r *UserRepository) Create(ctx context.Context, email string) (int64, error) {
-	const op = "UserRepository.Create"
-	log := r.logger.With(slog.String("op", op))
-
-	var id int64
-	if err := r.db.QueryRow(ctx, createUserRepositoryQuery, email).Scan(&id); err != nil {
-		log.ErrorContext(ctx, "query failed",
-			slog.String("email", email),
-			slog.String("error", err.Error()),
-		)
-		return 0, fmt.Errorf("%s: query row: %w", op, err)
-	}
-
-	log.DebugContext(ctx, "user created",
-		slog.String("email", email),
-		slog.Int64("id", id),
-	)
-	return id, nil
-}
-
 const getOrCreateUserRepositoryQuery = `
 	INSERT INTO users (email)
 	VALUES ($1)

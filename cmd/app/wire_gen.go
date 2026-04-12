@@ -32,7 +32,7 @@ import (
 
 // Injectors from wire.go:
 
-func InitializeApp(ctx context.Context, redisHost config.RedisHostType, redisPort config.RedisPortType, redisPassword config.RedisPasswordType, redisDB int, dsn config.DSNType, emailHost config.EmailHostType, emailPort config.EmailPortType, emailPassword config.EmailPasswordType, emailFrom config.EmailFromType, emailUser config.EmailUserType, apiKey config.ApiKeyType, githubToken config.GitHubTokenType) (*App, func(), error) {
+func InitializeApp(ctx context.Context, redisHost config.RedisHostType, redisPort config.RedisPortType, redisPassword config.RedisPasswordType, redisDB int, dsn config.DSNType, emailHost config.EmailHostType, emailPort config.EmailPortType, emailPassword config.EmailPasswordType, emailFrom config.EmailFromType, emailUser config.EmailUserType, apiKey config.ApiKeyType, githubToken config.GitHubTokenType, baseURL config.AppBaseURLType) (*App, func(), error) {
 	pool, cleanup, err := postgres.New(ctx, dsn)
 	if err != nil {
 		return nil, nil, err
@@ -47,10 +47,9 @@ func InitializeApp(ctx context.Context, redisHost config.RedisHostType, redisPor
 	gitHubClient := github.NewGitHubClient(cache, githubToken)
 	userRepository := postgres2.NewUserRepository(pool)
 	repositoryRepository := postgres2.NewRepositoryRepository(pool)
-	smtpClient := email.NewSmtpClient(emailHost, emailPort, emailFrom, emailPassword, emailUser)
+	smtpClient := email.NewSmtpClient(emailHost, emailPort, emailFrom, emailPassword, emailUser, baseURL)
 	subscriptionUseCase := usecase.NewSubscriptionUseCase(subscriptionRepository, gitHubClient, userRepository, repositoryRepository, smtpClient)
-	userUseCase := usecase.NewUserUseCase(userRepository)
-	ginServer := http.NewGinServer(subscriptionUseCase, userUseCase, client, apiKey)
+	ginServer := http.NewGinServer(subscriptionUseCase, client, apiKey)
 	subscriptionHandler := grpc.NewSubscriptionHandler(subscriptionUseCase)
 	server := grpc.NewGrpcServer(subscriptionHandler, apiKey)
 	app := &App{
@@ -65,7 +64,7 @@ func InitializeApp(ctx context.Context, redisHost config.RedisHostType, redisPor
 
 // wire.go:
 
-var UseCaseSet = wire.NewSet(usecase.NewSubscriptionUseCase, usecase.NewUserUseCase, wire.Bind(new(usecase2.UserUseCase), new(*usecase.UserUseCase)), wire.Bind(new(usecase2.SubscriptionUseCase), new(*usecase.SubscriptionUseCase)))
+var UseCaseSet = wire.NewSet(usecase.NewSubscriptionUseCase, wire.Bind(new(usecase2.SubscriptionUseCase), new(*usecase.SubscriptionUseCase)))
 
 var RepositorySet = wire.NewSet(postgres.New, postgres2.NewRepositoryRepository, postgres2.NewSubscriptionRepository, postgres2.NewUserRepository, wire.Bind(new(postgres2.PgxInterface), new(*pgxpool.Pool)), wire.Bind(new(repository.RepositoryRepository), new(*postgres2.RepositoryRepository)), wire.Bind(new(repository.SubscriptionRepository), new(*postgres2.SubscriptionRepository)), wire.Bind(new(repository.UserRepository), new(*postgres2.UserRepository)))
 

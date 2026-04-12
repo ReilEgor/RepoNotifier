@@ -14,24 +14,6 @@ type RepositoryRepository struct {
 	mock.Mock
 }
 
-// Create provides a mock function with given fields: ctx, repo
-func (_m *RepositoryRepository) Create(ctx context.Context, repo *model.Repository) error {
-	ret := _m.Called(ctx, repo)
-
-	if len(ret) == 0 {
-		panic("no return value specified for Create")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, *model.Repository) error); ok {
-		r0 = rf(ctx, repo)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // GetAll provides a mock function with given fields: ctx
 func (_m *RepositoryRepository) GetAll(ctx context.Context) ([]model.Repository, error) {
 	ret := _m.Called(ctx)
@@ -55,36 +37,6 @@ func (_m *RepositoryRepository) GetAll(ctx context.Context) ([]model.Repository,
 
 	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
 		r1 = rf(ctx)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// GetByName provides a mock function with given fields: ctx, name
-func (_m *RepositoryRepository) GetByName(ctx context.Context, name string) (*model.Repository, error) {
-	ret := _m.Called(ctx, name)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetByName")
-	}
-
-	var r0 *model.Repository
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (*model.Repository, error)); ok {
-		return rf(ctx, name)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) *model.Repository); ok {
-		r0 = rf(ctx, name)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.Repository)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, name)
 	} else {
 		r1 = ret.Error(1)
 	}

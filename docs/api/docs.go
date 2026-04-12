@@ -15,39 +15,37 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/subscriptions": {
+        "/confirm/{token}": {
             "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get a list of all repositories the user is currently subscribed to.",
+                "description": "Confirm a pending subscription using the token sent via email.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "subscriptions"
                 ],
-                "summary": "List user subscriptions",
+                "summary": "Confirm email subscription",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User email address",
-                        "name": "email",
-                        "in": "query",
+                        "description": "Confirmation token",
+                        "name": "token",
+                        "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "message: subscription confirmed successfully",
                         "schema": {
-                            "$ref": "#/definitions/github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.ListSubscriptionsResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
-                    "400": {
-                        "description": "Email is required",
+                    "404": {
+                        "description": "Invalid or expired token",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -65,14 +63,11 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
+            }
+        },
+        "/subscribe": {
             "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Create a subscription for a user to track the latest releases of a GitHub repository.",
+                "description": "Create a pending subscription and send a confirmation email.",
                 "consumes": [
                     "application/json"
                 ],
@@ -95,8 +90,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created",
+                    "202": {
+                        "description": "Accepted",
                         "schema": {
                             "$ref": "#/definitions/github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.CreateSubscriptionResponse"
                         }
@@ -109,9 +104,43 @@ const docTemplate = `{
                                 "type": "string"
                             }
                         }
+                    }
+                }
+            }
+        },
+        "/subscriptions": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of all confirmed subscriptions for a given email.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "subscriptions"
+                ],
+                "summary": "Get all active subscriptions",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User email address",
+                        "name": "email",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.ListSubscriptionsResponse"
+                        }
                     },
-                    "404": {
-                        "description": "Repository not found on GitHub",
+                    "400": {
+                        "description": "Email is required or invalid",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -129,33 +158,25 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Remove a subscription for a specific user and repository.",
-                "consumes": [
-                    "application/json"
-                ],
+            }
+        },
+        "/unsubscribe/{token}": {
+            "get": {
+                "description": "Remove a subscription using a unique token.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "subscriptions"
                 ],
-                "summary": "Unsubscribe from a repository",
+                "summary": "Unsubscribe from notifications",
                 "parameters": [
                     {
-                        "description": "Unsubscribe details",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.DeleteSubscriptionRequest"
-                        }
+                        "type": "string",
+                        "description": "Unsubscribe token",
+                        "name": "token",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -165,8 +186,8 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.DeleteSubscriptionResponse"
                         }
                     },
-                    "400": {
-                        "description": "Invalid request body",
+                    "404": {
+                        "description": "Invalid token or subscription not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -210,29 +231,10 @@ const docTemplate = `{
         "github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.CreateSubscriptionResponse": {
             "type": "object",
             "properties": {
-                "id": {
-                    "description": "The ID of the subscription in the database.",
-                    "type": "integer",
-                    "example": 1
-                }
-            }
-        },
-        "github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.DeleteSubscriptionRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "repository"
-            ],
-            "properties": {
-                "email": {
-                    "description": "Email address associated with the subscription.",
+                "message": {
+                    "description": "Status message indicating the result of the subscription creation.",
                     "type": "string",
-                    "example": "user@example.com"
-                },
-                "repository": {
-                    "description": "Repository name to unsubscribe from.",
-                    "type": "string",
-                    "example": "golang/go"
+                    "example": "Confirmation email sent"
                 }
             }
         },
@@ -266,6 +268,10 @@ const docTemplate = `{
         "github_com_ReilEgor_RepoNotifier_internal_transport_http_dto.SubscriptionResponse": {
             "type": "object",
             "properties": {
+                "confirmed": {
+                    "description": "Indicates whether the subscription has been confirmed by the user.",
+                    "type": "boolean"
+                },
                 "created_at": {
                     "description": "Timestamp when the subscription was created.",
                     "type": "string",
@@ -281,10 +287,9 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 1
                 },
-                "repository_id": {
-                    "description": "Reference to the repository ID.",
-                    "type": "integer",
-                    "example": 101
+                "last_seen_tag": {
+                    "description": "The latest tag seen for this subscription, useful for tracking updates.",
+                    "type": "string"
                 },
                 "repository_name": {
                     "description": "The name of the repository (extracted from FullName).",

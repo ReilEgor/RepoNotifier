@@ -7,7 +7,6 @@ import (
 	"log/slog"
 
 	"github.com/ReilEgor/RepoNotifier/internal/domain/model"
-	"github.com/jackc/pgx/v5"
 )
 
 const (
@@ -30,45 +29,20 @@ func NewRepositoryRepository(db PgxInterface) *RepositoryRepository {
 		logger: slog.With(slog.String("component", componentRepositoryRepository)),
 	}
 }
-func (r *RepositoryRepository) Create(ctx context.Context, repo *model.Repository) error {
-	panic("not implemented")
-}
 
-const getByNameRepositoryQuery = `SELECT id, full_name, last_seen_tag, updated_at FROM repositories WHERE full_name = $1`
-
-func (r *RepositoryRepository) GetByName(ctx context.Context, name string) (*model.Repository, error) {
-	const op = "RepositoryRepository.GetByName"
-	log := r.logger.With(slog.String("op", op))
-
-	var repo model.Repository
-	err := r.db.QueryRow(ctx, getByNameRepositoryQuery, name).Scan(
-		&repo.ID,
-		&repo.FullName,
-		&repo.LastSeenTag,
-		&repo.UpdatedAt,
-	)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			log.DebugContext(ctx, "repository not found", slog.String("op", op), slog.String("name", name))
-			return nil, fmt.Errorf("%s: %w", op, ErrRepositoryNotFound)
-		}
-		log.ErrorContext(ctx, "query failed",
-			slog.String("name", name),
-			slog.String("error", err.Error()),
-		)
-		return nil, fmt.Errorf("%s: query row: %w", op, err)
-	}
-
-	return &repo, nil
-}
-
-const getAllRepositoryQuery = `SELECT id, full_name, last_seen_tag, updated_at FROM repositories`
+const getActiveRepositoriesQuery = `
+    SELECT r.id, r.full_name, r.last_seen_tag, r.updated_at 
+    FROM repositories r
+    WHERE EXISTS (
+        SELECT 1 FROM subscriptions s WHERE s.repository_id = r.id
+    )
+`
 
 func (r *RepositoryRepository) GetAll(ctx context.Context) ([]model.Repository, error) {
 	const op = "RepositoryRepository.GetAll"
 	log := r.logger.With(slog.String("op", op))
 
-	rows, err := r.db.Query(ctx, getAllRepositoryQuery)
+	rows, err := r.db.Query(ctx, getActiveRepositoriesQuery)
 	if err != nil {
 		log.ErrorContext(ctx, "query failed",
 			slog.String("error", err.Error()),
@@ -156,4 +130,23 @@ func (r *RepositoryRepository) GetOrCreate(ctx context.Context, name string, tag
 		slog.Int64("id", repo.ID),
 	)
 	return &repo, nil
+}
+
+const subscribeQuery = `
+    INSERT INTO subscriptions (user_id, repository_id, token, is_confirmed)
+    VALUES ($1, $2, $3, FALSE)
+    ON CONFLICT (user_id, repository_id) 
+    DO UPDATE SET token = EXCLUDED.token, is_confirmed = FALSE
+    RETURNING id
+`
+
+func (r *SubscriptionRepository) CreatePending(ctx context.Context, userID, repoID int64, token string) (int64, error) {
+	const op = "SubscriptionRepository.CreatePending"
+	var id int64
+
+	err := r.db.QueryRow(ctx, subscribeQuery, userID, repoID, token).Scan(&id)
+	if err != nil {
+		return 0, fmt.Errorf("%s: %w", op, err)
+	}
+	return id, nil
 }

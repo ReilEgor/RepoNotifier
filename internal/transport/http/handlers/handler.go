@@ -13,15 +13,13 @@ import (
 
 type Handler struct {
 	subscriptionUC usecase.SubscriptionUseCase
-	userUC         usecase.UserUseCase
 	logger         *slog.Logger
 	apiKey         string
 }
 
-func NewHandler(subscriptionUC usecase.SubscriptionUseCase, userUC usecase.UserUseCase, apiKey string) *Handler {
+func NewHandler(subscriptionUC usecase.SubscriptionUseCase, apiKey string) *Handler {
 	return &Handler{
 		subscriptionUC: subscriptionUC,
-		userUC:         userUC,
 		logger:         slog.With(slog.String("component", "handler")),
 		apiKey:         apiKey,
 	}
@@ -33,14 +31,18 @@ func (h *Handler) InitRoutes(router *gin.Engine) {
 	})
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router.StaticFile("/", "./static/index.html")
+
 	api := router.Group("/api/v1")
-	api.Use(middleware.AuthMiddleware(h.apiKey))
 	{
-		subscriptions := api.Group("/subscriptions")
+
+		api.GET("/confirm/:token", h.Confirm)
+		api.GET("/unsubscribe/:token", h.UnsubscribeByToken)
+
+		protected := api.Group("")
+		protected.Use(middleware.AuthMiddleware(h.apiKey))
 		{
-			subscriptions.POST("", h.Subscribe)
-			subscriptions.DELETE("", h.Unsubscribe)
-			subscriptions.GET("", h.ListSubscriptions)
+			protected.POST("/subscribe", h.Subscribe)
+			protected.GET("/subscriptions", h.ListSubscriptions)
 		}
 	}
 }
